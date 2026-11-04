@@ -122,6 +122,14 @@ grid dimensions, cell values, and rejection of malformed or trailing JSON data.
 Batch tests run the executable against all three assignment samples, zero cycles,
 early extinction, boundaries, and input/output errors. Test files stay in `build/`.
 
+## Continuous integration
+
+GitHub Actions runs `.github/workflows/ci.yml` on pushes, pull requests, and manual
+runs from the Actions tab. Three independent jobs build and test Release on
+macOS (Apple Clang), Linux (GCC), and Windows (MSVC), using CMake and CTest.
+The jobs use the bundled JSON dependency and run the automated batch and unit
+tests without playback delays. Interactive terminal behavior is checked separately.
+
 ## Project structure
 
 - `CMakeLists.txt`: executable target, language standard, and compiler warnings.
