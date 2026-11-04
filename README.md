@@ -107,6 +107,8 @@ underpopulation, overpopulation, empty worlds, and boundaries. Each evolution
 case also checks that the original world is unchanged.
 `json_storage_tests` checks configuration parsing, numeric limits, required fields,
 grid dimensions, cell values, and rejection of malformed or trailing JSON data.
+Batch tests run the executable against all three assignment samples, zero cycles,
+early extinction, boundaries, and input/output errors. Test files stay in `build/`.
 
 ## Project structure
 
@@ -116,5 +118,6 @@ grid dimensions, cell values, and rejection of malformed or trailing JSON data.
 - `src/json_storage.hpp`, `src/json_storage.cpp`: configuration loading and result saving.
 - `tests/world_tests.cpp`: world construction, access, and evolution checks via CTest.
 - `tests/json_storage_tests.cpp`: configuration parsing and validation checks.
+- `tests/batch_case.cmake`: executable and output-file checks using CMake only.
 - `third_party/`: the bundled JSON library, license, and version information.
 - `build/`: generated build files, excluded from Git.

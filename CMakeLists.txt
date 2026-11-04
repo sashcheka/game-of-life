@@ -25,6 +25,13 @@ if(BUILD_TESTING)
     target_include_directories(json_storage_tests SYSTEM PRIVATE third_party)
     add_test(NAME json_storage_tests COMMAND json_storage_tests)
     list(APPEND life_targets world_tests json_storage_tests)
+    foreach(case IN ITEMS blinker empty block zero_cycles extinction rectangle
+                          blinker_two_steps corner_birth output_error invalid_input)
+        add_test(NAME batch_${case} COMMAND ${CMAKE_COMMAND}
+            "-DPROGRAM=$<TARGET_FILE:game_of_life>" "-DCASE=${case}"
+            "-DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/batch-tests/${case}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/batch_case.cmake")
+    endforeach()
 endif()
 
 foreach(target IN LISTS life_targets)
