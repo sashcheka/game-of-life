@@ -1,3 +1,5 @@
+#include "application.hpp"
+
 #include "json_storage.hpp"
 #include "terminal_renderer.hpp"
 
@@ -6,7 +8,6 @@
 #include <chrono>
 #include <csignal>
 #include <cstddef>
-#include <exception>
 #include <iostream>
 #include <stdexcept>
 #include <string_view>
@@ -130,20 +131,18 @@ void print_final_state(const life::World& world, const RunResult& result,
 
 } // namespace
 
-int main(int argc, char* argv[]) {
-    try {
-        const auto options = parse_options(argc, argv);
-        install_stop_handlers();
-        auto config = life::load_config("game_of_life_input.json");
-        life::TerminalRenderer terminal(!options.batch, options.style);
+namespace life {
 
-        print_initial_state(config, terminal.style());
-        const auto result = run_generations(config, terminal);
-        life::save_result("game_of_life_output.json", config.world);
-        print_final_state(config.world, result, terminal.style());
-        return 0;
-    } catch (const std::exception& error) {
-        std::cerr << "Error: " << error.what() << '\n';
-        return 1;
-    }
+void run_application(int argc, char* argv[]) {
+    const auto options = parse_options(argc, argv);
+    install_stop_handlers();
+    auto config = load_config("game_of_life_input.json");
+    TerminalRenderer terminal(!options.batch, options.style);
+
+    print_initial_state(config, terminal.style());
+    const auto result = run_generations(config, terminal);
+    save_result("game_of_life_output.json", config.world);
+    print_final_state(config.world, result, terminal.style());
 }
+
+} // namespace life

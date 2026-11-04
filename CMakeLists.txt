@@ -13,7 +13,7 @@ target_link_libraries(life_json PUBLIC life_core)
 add_library(life_terminal src/terminal_renderer.cpp)
 target_link_libraries(life_terminal PUBLIC life_core)
 
-add_executable(game_of_life src/application.cpp)
+add_executable(game_of_life src/main.cpp src/application.cpp)
 target_link_libraries(game_of_life PRIVATE life_json life_terminal)
 
 set(life_targets life_core life_json life_terminal game_of_life)
