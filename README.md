@@ -32,6 +32,10 @@ cmake --build build --config Debug
 .\build\Debug\game_of_life.exe
 ```
 
+In VS Code with CMake Tools installed, run **CMake: Configure** from the Command
+Palette. Use CMake Tools as the IntelliSense configuration provider so the editor
+gets the language standard and include paths from CMake.
+
 Expected output:
 
 ```text
