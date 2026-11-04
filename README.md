@@ -2,9 +2,9 @@
 
 A C++20 console implementation of Conway's Game of Life, built incrementally.
 
-The current version calculates the next generation and prints a built-in example
-before and after one evolution step. JSON input/output will be added in subsequent
-steps.
+The current version reads `game_of_life_input.json` from the working directory
+and prints the initial world and at most one evolution step. Full cycle execution,
+output JSON, and playback timing will be added in subsequent steps.
 
 ## Requirements
 
@@ -41,6 +41,7 @@ Expected output:
 
 ```text
 Game of Life: 5 x 5
+FPS: 1, requested cycles: 1
 Generation 0
 .....
 ..*..
@@ -65,6 +66,21 @@ A living cell survives with two or three living neighbors; a dead cell becomes
 alive with exactly three. All other cells in the new generation are dead.
 `World::next_generation()` returns a new world and leaves the original unchanged.
 
+## Input configuration
+
+The repository includes `game_of_life_input.json` with the blinker shown above.
+Run the executable from the directory containing this file.
+
+- `world.width` and `world.height`: positive integers matching the grid dimensions.
+- `world.cells`: an array of equally sized strings containing only `.` and `*`.
+- `simulation.fps`: a positive integer, currently displayed without affecting timing.
+- `simulation.cycles`: a nonnegative integer. Zero displays only the initial world;
+  positive values currently display one step as a preview.
+
+Numeric parameters must use integer JSON values and fit `std::size_t`.
+Invalid JSON, missing fields, invalid values, and file errors produce an error
+message on stderr and a nonzero exit code.
+
 ## Tests
 
 After building, run `ctest --test-dir build --output-on-failure` (add `-C Debug`
@@ -75,11 +91,16 @@ single-cell worlds, and fields with no living cells.
 Evolution checks cover a blinker over two steps, a stable block, loneliness,
 underpopulation, overpopulation, empty worlds, and boundaries. Each evolution
 case also checks that the original world is unchanged.
+`json_storage_tests` checks configuration parsing, numeric limits, required fields,
+grid dimensions, cell values, and rejection of malformed or trailing JSON data.
 
 ## Project structure
 
 - `CMakeLists.txt`: executable target, language standard, and compiler warnings.
 - `src/main.cpp`: program entry point and temporary example output.
 - `src/world.hpp`, `src/world.cpp`: world storage, neighbor counting, and evolution.
+- `src/json_storage.hpp`, `src/json_storage.cpp`: configuration loading and validation.
 - `tests/world_tests.cpp`: world construction, access, and evolution checks via CTest.
+- `tests/json_storage_tests.cpp`: configuration parsing and validation checks.
+- `third_party/`: the bundled JSON library, license, and version information.
 - `build/`: generated build files, excluded from Git.
