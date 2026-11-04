@@ -12,7 +12,7 @@ set(cycles 1)
 set(generation 1)
 set(reason "cycle limit")
 
-if(CASE STREQUAL "blinker")
+if(CASE STREQUAL "blinker" OR CASE STREQUAL "redirected_auto")
     # Defaults are the first sample from the assignment.
 elseif(CASE STREQUAL "empty")
     set(width 3)
@@ -76,8 +76,16 @@ file(WRITE "${TEST_DIR}/game_of_life_input.json"
     "{\"world\":{\"width\":${width},\"height\":${height},\"cells\":[\"${joined_cells}\"]},"
     "\"simulation\":{\"fps\":30,\"cycles\":${cycles}}}")
 
-execute_process(COMMAND "${PROGRAM}" WORKING_DIRECTORY "${TEST_DIR}"
+set(arguments --batch)
+if(CASE STREQUAL "redirected_auto")
+    set(arguments)
+endif()
+execute_process(COMMAND "${PROGRAM}" ${arguments} WORKING_DIRECTORY "${TEST_DIR}"
     RESULT_VARIABLE status OUTPUT_VARIABLE console ERROR_VARIABLE error TIMEOUT 10)
+string(ASCII 27 escape)
+if(console MATCHES "${escape}")
+    message(FATAL_ERROR "Batch or redirected output must not contain terminal controls")
+endif()
 if(CASE STREQUAL "output_error" OR CASE STREQUAL "invalid_input")
     if(NOT status STREQUAL "1")
         message(FATAL_ERROR "Expected exit code 1, got ${status}: ${error}")

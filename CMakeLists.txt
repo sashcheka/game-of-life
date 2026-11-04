@@ -14,7 +14,7 @@ add_library(life_terminal src/terminal_renderer.cpp)
 target_link_libraries(life_terminal PUBLIC life_core)
 
 add_executable(game_of_life src/main.cpp)
-target_link_libraries(game_of_life PRIVATE life_json)
+target_link_libraries(game_of_life PRIVATE life_json life_terminal)
 
 set(life_targets life_core life_json life_terminal game_of_life)
 
@@ -28,7 +28,7 @@ if(BUILD_TESTING)
     target_include_directories(json_storage_tests SYSTEM PRIVATE third_party)
     add_test(NAME json_storage_tests COMMAND json_storage_tests)
     list(APPEND life_targets world_tests json_storage_tests)
-    foreach(case IN ITEMS blinker empty block zero_cycles extinction rectangle
+    foreach(case IN ITEMS blinker redirected_auto empty block zero_cycles extinction rectangle
                           blinker_two_steps corner_birth output_error invalid_input)
         add_test(NAME batch_${case} COMMAND ${CMAKE_COMMAND}
             "-DPROGRAM=$<TARGET_FILE:game_of_life>" "-DCASE=${case}"

@@ -4,7 +4,8 @@ A C++20 console implementation of Conway's Game of Life, built incrementally.
 
 The current version reads `game_of_life_input.json` from the working directory
 and runs up to the requested number of evolution steps. It saves the final world
-to `game_of_life_output.json`. Live playback and history will be added later.
+to `game_of_life_output.json`. In a supported terminal, generations update in
+place at the configured FPS. History navigation will be added later.
 
 ## Requirements
 
@@ -37,11 +38,28 @@ In VS Code with CMake Tools installed, run **CMake: Configure** from the Command
 Palette. Use CMake Tools as the IntelliSense configuration provider so the editor
 gets the language standard and include paths from CMake.
 
-Expected output:
+The example animates a blinker at 5 FPS for up to 100 generations. Run it in a
+terminal, such as VS Code's integrated terminal, and press Ctrl+C to stop early.
+The display uses an alternate screen and restores the original screen and cursor
+when finished. Large fields show the top-left region that fits the window; the
+entire field is simulated and saved. Resizing updates the visible region.
+
+For an immediate calculation without animation or delays, use:
+
+```sh
+./build/game_of_life --batch
+```
+
+Redirected output and unsupported terminals automatically use batch mode.
+On Windows, live display enables virtual terminal processing and restores the
+previous console mode on exit. On macOS/Linux, it requires a terminal with `TERM`
+set to a value other than `dumb`.
+
+Expected batch output:
 
 ```text
 Game of Life: 5 x 5
-FPS: 1, requested cycles: 1
+FPS: 5, requested cycles: 100
 Generation 0
 .....
 ..*..
@@ -49,13 +67,13 @@ Generation 0
 ..*..
 .....
 Press Ctrl+C to stop.
-Generation 1
+Generation 100
 .....
+..*..
+..*..
+..*..
 .....
-.***.
-.....
-.....
-Stopped: cycle limit. Saved generation 1 to game_of_life_output.json
+Stopped: cycle limit. Saved generation 100 to game_of_life_output.json
 ```
 
 Neighbor counting includes horizontal, vertical, and diagonal neighbors, excluding
@@ -75,7 +93,7 @@ Run the executable from the directory containing this file.
 
 - `world.width` and `world.height`: positive integers matching the grid dimensions.
 - `world.cells`: an array of equally sized strings containing only `.` and `*`.
-- `simulation.fps`: a positive integer, displayed but unused in this batch mode.
+- `simulation.fps`: target updates per second in live mode; unused in batch mode.
 - `simulation.cycles`: maximum number of evolution steps. Zero saves the initial world.
 
 Numeric parameters must use integer JSON values and fit `std::size_t`.
@@ -87,6 +105,8 @@ message on stderr and a nonzero exit code.
 The simulation stops at the cycle limit, when no living cells remain, or after
 Ctrl+C (`SIGINT`) or a termination request (`SIGTERM`). Cancellation finishes the
 current generation and then saves it; no further evolution steps are started.
+During frame delays, cancellation is checked at intervals of at most 10 ms
+(actual response time also depends on system scheduling).
 An initially empty world stops at generation zero.
 
 The output contains only `result` with `width`, `height`, and `cells`, preserving
@@ -114,6 +134,7 @@ early extinction, boundaries, and input/output errors. Test files stay in `build
 
 - `CMakeLists.txt`: executable target, language standard, and compiler warnings.
 - `src/main.cpp`: simulation loop, cancellation, and console output.
+- `src/terminal_renderer.hpp`, `src/terminal_renderer.cpp`: live terminal display and restoration.
 - `src/world.hpp`, `src/world.cpp`: world storage, neighbor counting, and evolution.
 - `src/json_storage.hpp`, `src/json_storage.cpp`: configuration loading and result saving.
 - `tests/world_tests.cpp`: world construction, access, and evolution checks via CTest.

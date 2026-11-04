@@ -1,18 +1,31 @@
 #include "json_storage.hpp"
+#include "terminal_renderer.hpp"
 
+#include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <csignal>
 #include <cstddef>
 #include <exception>
 #include <iostream>
 #include <stdexcept>
+#include <string_view>
+#include <thread>
 
 namespace {
 
 std::atomic_flag stop_requested{};
+using Clock = std::chrono::steady_clock;
 
 extern "C" void request_stop(int) {
     (void)stop_requested.test_and_set();
+}
+
+void wait_for_frame(Clock::time_point deadline) {
+    const auto slice = std::chrono::duration_cast<Clock::duration>(std::chrono::milliseconds(10));
+    while (!stop_requested.test() && Clock::now() < deadline) {
+        std::this_thread::sleep_until(std::min(deadline, Clock::now() + slice));
+    }
 }
 
 void print_world(const life::World& world) {
@@ -26,8 +39,12 @@ void print_world(const life::World& world) {
 
 } // namespace
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
+        const bool batch = argc == 2 && std::string_view(argv[1]) == "--batch";
+        if (argc != 1 && !batch) {
+            throw std::invalid_argument("Usage: game_of_life [--batch]");
+        }
         if (std::signal(SIGINT, request_stop) == SIG_ERR ||
             std::signal(SIGTERM, request_stop) == SIG_ERR) {
             throw std::runtime_error("Cannot install stop handlers");
@@ -42,9 +59,28 @@ int main() {
         std::cout << "Press Ctrl+C to stop.\n" << std::flush;
 
         std::size_t generation = 0;
-        while (!stop_requested.test() && generation < config.cycles && world.has_living_cells()) {
-            world = world.next_generation();
-            ++generation;
+        {
+            life::TerminalRenderer terminal(!batch);
+            if (terminal.active()) {
+                terminal.draw(world, generation, config.cycles, config.fps);
+            }
+            const auto period = std::chrono::duration_cast<Clock::duration>(
+                std::chrono::duration<double>(1.0 / static_cast<double>(config.fps)));
+            auto next_frame = Clock::now();
+            while (!stop_requested.test() && generation < config.cycles && world.has_living_cells()) {
+                if (terminal.active()) {
+                    next_frame += period;
+                    wait_for_frame(next_frame);
+                    if (stop_requested.test()) {
+                        break;
+                    }
+                }
+                world = world.next_generation();
+                ++generation;
+                if (terminal.active()) {
+                    terminal.draw(world, generation, config.cycles, config.fps);
+                }
+            }
         }
         const bool cancelled = stop_requested.test();
         life::save_result("game_of_life_output.json", world);
