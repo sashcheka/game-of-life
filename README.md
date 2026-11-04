@@ -2,9 +2,9 @@
 
 A C++20 console implementation of Conway's Game of Life, built incrementally.
 
-The current version stores a rectangular world, counts living neighbors, and
-prints a built-in example. Evolution rules and JSON input/output will be added
-in subsequent steps.
+The current version calculates the next generation and prints a built-in example
+before and after one evolution step. JSON input/output will be added in subsequent
+steps.
 
 ## Requirements
 
@@ -36,18 +36,29 @@ Expected output:
 
 ```text
 Game of Life: 5 x 5
+Generation 0
 .....
 ..*..
 ..*..
 ..*..
 .....
-Living neighbors at (2, 2): 2
+Generation 1
+.....
+.....
+.***.
+.....
+.....
 ```
 
 Neighbor counting includes horizontal, vertical, and diagonal neighbors, excluding
 the cell itself. Cells outside the field are treated as dead; edges do not wrap.
 Queries must refer to a cell inside the field; invalid coordinates throw
 `std::out_of_range`.
+
+Each generation is calculated in a separate grid using only the previous state.
+A living cell survives with two or three living neighbors; a dead cell becomes
+alive with exactly three. All other cells in the new generation are dead.
+`World::next_generation()` returns a new world and leaves the original unchanged.
 
 ## Tests
 
@@ -56,11 +67,14 @@ for a Visual Studio generator). Tests check dimensions, cell access, and rejecti
 of invalid world data. A world with no living cells is valid; zero dimensions are not.
 Neighbor checks cover corners, edges, rectangular and one-dimensional fields,
 single-cell worlds, and fields with no living cells.
+Evolution checks cover a blinker over two steps, a stable block, loneliness,
+underpopulation, overpopulation, empty worlds, and boundaries. Each evolution
+case also checks that the original world is unchanged.
 
 ## Project structure
 
 - `CMakeLists.txt`: executable target, language standard, and compiler warnings.
 - `src/main.cpp`: program entry point and temporary example output.
-- `src/world.hpp`, `src/world.cpp`: world storage and checked `(x, y)` cell access.
-- `tests/world_tests.cpp`: world construction and access checks, run through CTest.
+- `src/world.hpp`, `src/world.cpp`: world storage, neighbor counting, and evolution.
+- `tests/world_tests.cpp`: world construction, access, and evolution checks via CTest.
 - `build/`: generated build files, excluded from Git.

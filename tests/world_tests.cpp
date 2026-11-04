@@ -32,6 +32,23 @@ bool has_neighbor_counts(std::vector<std::string> cells,
     return true;
 }
 
+bool evolves_to(const char* name, std::vector<std::string> cells,
+                std::vector<std::string> expected_cells) {
+    const life::World world(std::move(cells));
+    const auto original = world;
+    const life::World expected(std::move(expected_cells));
+    const auto next = world.next_generation();
+    if (next != expected) {
+        std::cerr << name << ": incorrect next generation\n";
+        return false;
+    }
+    if (world != original) {
+        std::cerr << name << ": the original world was modified\n";
+        return false;
+    }
+    return true;
+}
+
 int main() {
     const life::World world({"*..", "..*"});
     if (world.width() != 3 || world.height() != 2 ||
@@ -81,6 +98,25 @@ int main() {
         std::cerr << "Neighbor counting accepted an invalid row\n";
         return 1;
     } catch (const std::out_of_range&) {
+    }
+    const std::vector<std::string> vertical{".....", "..*..", "..*..", "..*..", "....."};
+    const std::vector<std::string> horizontal{".....", ".....", ".***.", ".....", "....."};
+    const std::vector<std::string> block{"....", ".**.", ".**.", "...."};
+    if (!evolves_to("Blinker first step", vertical, horizontal) ||
+        !evolves_to("Blinker second step", horizontal, vertical) ||
+        !evolves_to("Stable block", block, block) ||
+        !evolves_to("Loneliness", {"*"}, {"."}) ||
+        !evolves_to("Underpopulation", {"**"}, {".."}) ||
+        !evolves_to("Empty world", {"...", "..."}, {"...", "..."}) ||
+        !evolves_to("Overpopulation", {"***", "***", "***"}, {"*.*", "...", "*.*"}) ||
+        !evolves_to("Single row", {"***"}, {".*."}) ||
+        !evolves_to("Corner birth", {"**", "*."}, {"**", "**"})) {
+        return 1;
+    }
+    const life::World blinker(vertical);
+    if (blinker.next_generation().next_generation() != blinker) {
+        std::cerr << "Blinker did not return to its original state after two steps\n";
+        return 1;
     }
     return 0;
 }

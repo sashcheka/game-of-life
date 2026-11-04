@@ -52,4 +52,18 @@ std::size_t World::count_live_neighbors(std::size_t x, std::size_t y) const {
     return count;
 }
 
+World World::next_generation() const {
+    std::vector<std::string> next_cells(height(), std::string(width(), '.'));
+
+    for (std::size_t y = 0; y < height(); ++y) {
+        for (std::size_t x = 0; x < width(); ++x) {
+            const auto neighbors = count_live_neighbors(x, y);
+            if (neighbors == 3 || (neighbors == 2 && is_alive(x, y))) {
+                next_cells[y][x] = '*';
+            }
+        }
+    }
+    return World(std::move(next_cells));
+}
+
 } // namespace life
