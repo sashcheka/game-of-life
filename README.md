@@ -2,8 +2,8 @@
 
 A C++20 console implementation of Conway's Game of Life, built incrementally.
 
-The current version builds and prints a greeting. Simulation rules and JSON
-input/output will be added in subsequent steps.
+The current version stores a rectangular world and prints a built-in example.
+Simulation rules and JSON input/output will be added in subsequent steps.
 
 ## Requirements
 
@@ -34,11 +34,24 @@ cmake --build build --config Debug
 Expected output:
 
 ```text
-Game of Life
+Game of Life: 5 x 5
+.....
+..*..
+..*..
+..*..
+.....
 ```
+
+## Tests
+
+After building, run `ctest --test-dir build --output-on-failure` (add `-C Debug`
+for a Visual Studio generator). Tests check dimensions, cell access, and rejection
+of invalid world data. A world with no living cells is valid; zero dimensions are not.
 
 ## Project structure
 
 - `CMakeLists.txt`: executable target, language standard, and compiler warnings.
-- `src/main.cpp`: program entry point.
+- `src/main.cpp`: program entry point and temporary example output.
+- `src/world.hpp`, `src/world.cpp`: world storage and checked `(x, y)` cell access.
+- `tests/world_tests.cpp`: world construction and access checks, run through CTest.
 - `build/`: generated build files, excluded from Git.

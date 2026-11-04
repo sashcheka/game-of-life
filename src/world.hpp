@@ -1,0 +1,21 @@
+#pragma once
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+namespace life {
+
+class World {
+public:
+    explicit World(std::vector<std::string> cells);
+
+    [[nodiscard]] std::size_t width() const noexcept;
+    [[nodiscard]] std::size_t height() const noexcept;
+    [[nodiscard]] bool is_alive(std::size_t x, std::size_t y) const;
+
+private:
+    std::vector<std::string> cells_;
+};
+
+} // namespace life
