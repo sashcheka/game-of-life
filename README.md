@@ -38,7 +38,7 @@ In VS Code with CMake Tools installed, run **CMake: Configure** from the Command
 Palette. Use CMake Tools as the IntelliSense configuration provider so the editor
 gets the language standard and include paths from CMake.
 
-The example animates a blinker at 5 FPS for up to 100 generations. Run it in a
+The example animates a 78 x 32 field at 10 FPS for up to 600 generations. Run it in a
 terminal, such as VS Code's integrated terminal, and press Ctrl+C to stop early.
 The display uses an alternate screen and restores the original screen and cursor
 when finished. Large fields show the top-left region that fits the window; the
@@ -55,26 +55,18 @@ On Windows, live display enables virtual terminal processing and restores the
 previous console mode on exit. On macOS/Linux, it requires a terminal with `TERM`
 set to a value other than `dumb`.
 
-Expected batch output:
+The showcase includes:
 
-```text
-Game of Life: 5 x 5
-FPS: 5, requested cycles: 100
-Generation 0
-.....
-..*..
-..*..
-..*..
-.....
-Press Ctrl+C to stop.
-Generation 100
-.....
-..*..
-..*..
-..*..
-.....
-Stopped: cycle limit. Saved generation 100 to game_of_life_output.json
-```
+- A [Gosper glider gun](https://conwaylife.com/wiki/Gosper_glider_gun) in the upper
+  left, producing a stream of gliders.
+- A [pulsar](https://conwaylife.com/wiki/Pulsar) in the upper right, repeating every
+  three generations.
+- Two opposing gliders, a lightweight spaceship, and an R-pentomino below.
+- A block and a beehive near the bottom left as stable reference figures.
+
+Allow about one minute for the full live run, or stop early with Ctrl+C. Enlarge
+the terminal to see the lower part of the field. In batch mode, the initial and
+final fields are printed once and the result is saved without playback delays.
 
 Neighbor counting includes horizontal, vertical, and diagonal neighbors, excluding
 the cell itself. Cells outside the field are treated as dead; edges do not wrap.
@@ -88,7 +80,7 @@ alive with exactly three. All other cells in the new generation are dead.
 
 ## Input configuration
 
-The repository includes `game_of_life_input.json` with the blinker shown above.
+The repository includes `game_of_life_input.json` with the showcase described above.
 Run the executable from the directory containing this file.
 
 - `world.width` and `world.height`: positive integers matching the grid dimensions.
