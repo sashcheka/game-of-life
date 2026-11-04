@@ -10,10 +10,13 @@ add_library(life_json src/json_storage.cpp)
 target_include_directories(life_json SYSTEM PRIVATE third_party)
 target_link_libraries(life_json PUBLIC life_core)
 
+add_library(life_terminal src/terminal_renderer.cpp)
+target_link_libraries(life_terminal PUBLIC life_core)
+
 add_executable(game_of_life src/main.cpp)
 target_link_libraries(game_of_life PRIVATE life_json)
 
-set(life_targets life_core life_json game_of_life)
+set(life_targets life_core life_json life_terminal game_of_life)
 
 include(CTest)
 if(BUILD_TESTING)
