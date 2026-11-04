@@ -12,7 +12,8 @@ steps.
 - A C++20 compiler (Apple Clang, Clang, GCC, or MSVC).
 - The compiler's build tools, such as Make, Ninja, or MSBuild.
 
-The project has no third-party dependencies and needs no downloads during build.
+The nlohmann/json 3.12.0 header and its MIT license are included in `third_party/`.
+No dependency installation or downloads are needed during build.
 
 ## Build and run
 
