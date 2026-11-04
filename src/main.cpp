@@ -17,8 +17,35 @@ namespace {
 std::atomic_flag stop_requested{};
 using Clock = std::chrono::steady_clock;
 
+struct RunOptions {
+    bool batch = false;
+    life::CellStyle style = life::CellStyle::HalfBlocks;
+};
+
+RunOptions parse_options(int argc, char* argv[]) {
+    RunOptions options;
+    for (int i = 1; i < argc; ++i) {
+        const std::string_view argument(argv[i]);
+        if (argument == "--batch") {
+            options.batch = true;
+        } else if (argument == "--ascii") {
+            options.style = life::CellStyle::Ascii;
+        } else {
+            throw std::invalid_argument("Usage: game_of_life [--batch] [--ascii]");
+        }
+    }
+    return options;
+}
+
 extern "C" void request_stop(int) {
     (void)stop_requested.test_and_set();
+}
+
+void install_stop_handlers() {
+    if (std::signal(SIGINT, request_stop) == SIG_ERR ||
+        std::signal(SIGTERM, request_stop) == SIG_ERR) {
+        throw std::runtime_error("Cannot install stop handlers");
+    }
 }
 
 void wait_for_frame(Clock::time_point deadline) {
@@ -34,35 +61,41 @@ void print_world(const life::World& world, life::CellStyle style) {
     }
 }
 
+void print_initial_state(const life::GameConfig& config, life::CellStyle style) {
+    const auto& world = config.world;
+    std::cout << "Game of Life: " << world.width() << " x " << world.height() << '\n';
+    std::cout << "FPS: " << config.fps << ", requested cycles: " << config.cycles << '\n';
+    std::cout << "Generation 0\n";
+    print_world(world, style);
+    std::cout << "Press Ctrl+C to stop.\n" << std::flush;
+}
+
+void print_final_state(const life::World& world, std::size_t generation,
+                       bool cancelled, life::CellStyle style) {
+    if (generation > 0) {
+        std::cout << "Generation " << generation << '\n';
+        print_world(world, style);
+    }
+    const char* reason = "cycle limit";
+    if (cancelled) {
+        reason = "cancelled";
+    } else if (!world.has_living_cells()) {
+        reason = "no living cells";
+    }
+    std::cout << "Stopped: " << reason << ". Saved generation " << generation
+              << " to game_of_life_output.json\n";
+}
+
 } // namespace
 
 int main(int argc, char* argv[]) {
     try {
-        bool batch = false;
-        auto style = life::CellStyle::HalfBlocks;
-        for (int i = 1; i < argc; ++i) {
-            const std::string_view argument(argv[i]);
-            if (argument == "--batch") {
-                batch = true;
-            } else if (argument == "--ascii") {
-                style = life::CellStyle::Ascii;
-            } else {
-                throw std::invalid_argument("Usage: game_of_life [--batch] [--ascii]");
-            }
-        }
-        if (std::signal(SIGINT, request_stop) == SIG_ERR ||
-            std::signal(SIGTERM, request_stop) == SIG_ERR) {
-            throw std::runtime_error("Cannot install stop handlers");
-        }
+        const auto options = parse_options(argc, argv);
+        install_stop_handlers();
         auto config = life::load_config("game_of_life_input.json");
         auto& world = config.world;
-        life::TerminalRenderer terminal(!batch, style);
-
-        std::cout << "Game of Life: " << world.width() << " x " << world.height() << '\n';
-        std::cout << "FPS: " << config.fps << ", requested cycles: " << config.cycles << '\n';
-        std::cout << "Generation 0\n";
-        print_world(world, terminal.style());
-        std::cout << "Press Ctrl+C to stop.\n" << std::flush;
+        life::TerminalRenderer terminal(!options.batch, options.style);
+        print_initial_state(config, terminal.style());
 
         std::size_t generation = 0;
         terminal.start();
@@ -89,18 +122,7 @@ int main(int argc, char* argv[]) {
         terminal.finish();
         const bool cancelled = stop_requested.test();
         life::save_result("game_of_life_output.json", world);
-        if (generation > 0) {
-            std::cout << "Generation " << generation << '\n';
-            print_world(world, terminal.style());
-        }
-        const char* reason = "cycle limit";
-        if (cancelled) {
-            reason = "cancelled";
-        } else if (!world.has_living_cells()) {
-            reason = "no living cells";
-        }
-        std::cout << "Stopped: " << reason << ". Saved generation " << generation
-                  << " to game_of_life_output.json\n";
+        print_final_state(world, generation, cancelled, terminal.style());
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Error: " << error.what() << '\n';
