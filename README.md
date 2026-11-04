@@ -3,8 +3,8 @@
 A C++20 console implementation of Conway's Game of Life, built incrementally.
 
 The current version reads `game_of_life_input.json` from the working directory
-and prints the initial world and at most one evolution step. Full cycle execution,
-output JSON, and playback timing will be added in subsequent steps.
+and runs up to the requested number of evolution steps. It saves the final world
+to `game_of_life_output.json`. Live playback and history will be added later.
 
 ## Requirements
 
@@ -48,12 +48,14 @@ Generation 0
 ..*..
 ..*..
 .....
+Press Ctrl+C to stop.
 Generation 1
 .....
 .....
 .***.
 .....
 .....
+Stopped: cycle limit. Saved generation 1 to game_of_life_output.json
 ```
 
 Neighbor counting includes horizontal, vertical, and diagonal neighbors, excluding
@@ -73,13 +75,25 @@ Run the executable from the directory containing this file.
 
 - `world.width` and `world.height`: positive integers matching the grid dimensions.
 - `world.cells`: an array of equally sized strings containing only `.` and `*`.
-- `simulation.fps`: a positive integer, currently displayed without affecting timing.
-- `simulation.cycles`: a nonnegative integer. Zero displays only the initial world;
-  positive values currently display one step as a preview.
+- `simulation.fps`: a positive integer, displayed but unused in this batch mode.
+- `simulation.cycles`: maximum number of evolution steps. Zero saves the initial world.
 
 Numeric parameters must use integer JSON values and fit `std::size_t`.
 Invalid JSON, missing fields, invalid values, and file errors produce an error
 message on stderr and a nonzero exit code.
+
+## Stopping and output
+
+The simulation stops at the cycle limit, when no living cells remain, or after
+Ctrl+C (`SIGINT`) or a termination request (`SIGTERM`). Cancellation finishes the
+current generation and then saves it; no further evolution steps are started.
+An initially empty world stops at generation zero.
+
+The output contains only `result` with `width`, `height`, and `cells`, preserving
+the assignment schema. It is created or overwritten in the working directory.
+Normal completion and cancellation return exit code zero after saving; read or
+write errors return a nonzero code. Forced termination that cannot be intercepted
+(such as `SIGKILL` or power loss) cannot trigger saving.
 
 ## Tests
 
@@ -97,9 +111,9 @@ grid dimensions, cell values, and rejection of malformed or trailing JSON data.
 ## Project structure
 
 - `CMakeLists.txt`: executable target, language standard, and compiler warnings.
-- `src/main.cpp`: program entry point and temporary example output.
+- `src/main.cpp`: simulation loop, cancellation, and console output.
 - `src/world.hpp`, `src/world.cpp`: world storage, neighbor counting, and evolution.
-- `src/json_storage.hpp`, `src/json_storage.cpp`: configuration loading and validation.
+- `src/json_storage.hpp`, `src/json_storage.cpp`: configuration loading and result saving.
 - `tests/world_tests.cpp`: world construction, access, and evolution checks via CTest.
 - `tests/json_storage_tests.cpp`: configuration parsing and validation checks.
 - `third_party/`: the bundled JSON library, license, and version information.

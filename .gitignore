@@ -52,6 +52,7 @@ install_manifest.txt
 compile_commands.json
 
 # Temporary files
+/game_of_life_output.json
 *.tmp
 *.log
 *.bak

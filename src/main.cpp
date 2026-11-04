@@ -1,8 +1,19 @@
 #include "json_storage.hpp"
 
+#include <atomic>
+#include <csignal>
 #include <cstddef>
 #include <exception>
 #include <iostream>
+#include <stdexcept>
+
+namespace {
+
+std::atomic_flag stop_requested{};
+
+extern "C" void request_stop(int) {
+    (void)stop_requested.test_and_set();
+}
 
 void print_world(const life::World& world) {
     for (std::size_t y = 0; y < world.height(); ++y) {
@@ -13,20 +24,42 @@ void print_world(const life::World& world) {
     }
 }
 
+} // namespace
+
 int main() {
     try {
-        const auto config = life::load_config("game_of_life_input.json");
-        const auto& world = config.world;
+        if (std::signal(SIGINT, request_stop) == SIG_ERR ||
+            std::signal(SIGTERM, request_stop) == SIG_ERR) {
+            throw std::runtime_error("Cannot install stop handlers");
+        }
+        auto config = life::load_config("game_of_life_input.json");
+        auto& world = config.world;
 
         std::cout << "Game of Life: " << world.width() << " x " << world.height() << '\n';
         std::cout << "FPS: " << config.fps << ", requested cycles: " << config.cycles << '\n';
         std::cout << "Generation 0\n";
         print_world(world);
-        if (config.cycles > 0) {
-            const auto next = world.next_generation();
-            std::cout << "Generation 1\n";
-            print_world(next);
+        std::cout << "Press Ctrl+C to stop.\n" << std::flush;
+
+        std::size_t generation = 0;
+        while (!stop_requested.test() && generation < config.cycles && world.has_living_cells()) {
+            world = world.next_generation();
+            ++generation;
         }
+        const bool cancelled = stop_requested.test();
+        life::save_result("game_of_life_output.json", world);
+        if (generation > 0) {
+            std::cout << "Generation " << generation << '\n';
+            print_world(world);
+        }
+        const char* reason = "cycle limit";
+        if (cancelled) {
+            reason = "cancelled";
+        } else if (!world.has_living_cells()) {
+            reason = "no living cells";
+        }
+        std::cout << "Stopped: " << reason << ". Saved generation " << generation
+                  << " to game_of_life_output.json\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Error: " << error.what() << '\n';
