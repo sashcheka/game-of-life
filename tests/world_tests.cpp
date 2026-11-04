@@ -57,6 +57,10 @@ int main() {
         return 1;
     }
     const life::World dead_world({"."});
+    if (!world.has_living_cells() || dead_world.has_living_cells()) {
+        std::cerr << "Incorrect detection of living cells\n";
+        return 1;
+    }
     if (dead_world.is_alive(0, 0)) {
         std::cerr << "A valid world can contain no living cells\n";
         return 1;

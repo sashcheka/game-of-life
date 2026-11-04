@@ -1,5 +1,7 @@
 #include "json_storage.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -88,6 +90,24 @@ int main() {
     if (!rejects("") || !rejects("{") || !rejects("[]") ||
         !rejects(valid + "{}") || !rejects(valid + "garbage")) {
         return 1;
+    }
+    std::ostringstream output;
+    life::write_result(output, expected);
+    const auto result = nlohmann::json::parse(output.str());
+    const auto expected_result = nlohmann::json::parse(R"({
+        "result":{"width":3,"height":2,"cells":["*..","..*"]}
+    })");
+    if (result != expected_result) {
+        std::cerr << "Incorrect output JSON schema or cell values\n";
+        return 1;
+    }
+    std::ostringstream broken;
+    broken.setstate(std::ios::badbit);
+    try {
+        life::write_result(broken, expected);
+        std::cerr << "An output stream error was ignored\n";
+        return 1;
+    } catch (const std::runtime_error&) {
     }
     return 0;
 }

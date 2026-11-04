@@ -61,4 +61,33 @@ GameConfig load_config(const std::filesystem::path& path) {
     return read_config(input);
 }
 
+void write_result(std::ostream& output, const World& world) {
+    std::vector<std::string> cells(world.height(), std::string(world.width(), '.'));
+    for (std::size_t y = 0; y < world.height(); ++y) {
+        for (std::size_t x = 0; x < world.width(); ++x) {
+            if (world.is_alive(x, y)) {
+                cells[y][x] = '*';
+            }
+        }
+    }
+    const nlohmann::json document{
+        {"result", {{"width", world.width()}, {"height", world.height()}, {"cells", cells}}}};
+    output << document.dump(4) << '\n';
+    if (!output) {
+        throw std::runtime_error("Cannot write JSON result");
+    }
+}
+
+void save_result(const std::filesystem::path& path, const World& world) {
+    std::ofstream output(path);
+    if (!output.is_open()) {
+        throw std::runtime_error("Cannot open output file: " + path.string());
+    }
+    write_result(output, world);
+    output.close();
+    if (!output) {
+        throw std::runtime_error("Cannot finish writing output file: " + path.string());
+    }
+}
+
 } // namespace life

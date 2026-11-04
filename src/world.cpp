@@ -31,6 +31,15 @@ bool World::is_alive(std::size_t x, std::size_t y) const {
     return cells_.at(y).at(x) == '*';
 }
 
+bool World::has_living_cells() const noexcept {
+    for (const auto& row : cells_) {
+        if (row.find('*') != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::size_t World::count_live_neighbors(std::size_t x, std::size_t y) const {
     if (x >= width() || y >= height()) {
         throw std::out_of_range("Cell coordinates are outside the world");
