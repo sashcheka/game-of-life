@@ -13,5 +13,6 @@ int main() {
         }
         std::cout << '\n';
     }
+    std::cout << "Living neighbors at (2, 2): " << world.count_live_neighbors(2, 2) << '\n';
     return 0;
 }

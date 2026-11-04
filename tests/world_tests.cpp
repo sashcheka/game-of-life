@@ -1,5 +1,6 @@
 #include "world.hpp"
 
+#include <cstddef>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -13,6 +14,22 @@ bool rejects(std::vector<std::string> cells) {
         return true;
     }
     return false;
+}
+
+bool has_neighbor_counts(std::vector<std::string> cells,
+                         const std::vector<std::vector<std::size_t>>& expected) {
+    const life::World world(std::move(cells));
+    for (std::size_t y = 0; y < world.height(); ++y) {
+        for (std::size_t x = 0; x < world.width(); ++x) {
+            const auto actual = world.count_live_neighbors(x, y);
+            if (actual != expected.at(y).at(x)) {
+                std::cerr << "Neighbor count at (" << x << ", " << y << "): expected "
+                          << expected.at(y).at(x) << ", got " << actual << '\n';
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 int main() {
@@ -41,6 +58,27 @@ int main() {
     try {
         (void)world.is_alive(0, world.height());
         std::cerr << "An invalid row was accepted\n";
+        return 1;
+    } catch (const std::out_of_range&) {
+    }
+    if (!has_neighbor_counts({"***", "***", "***"}, {{3, 5, 3}, {5, 8, 5}, {3, 5, 3}}) ||
+        !has_neighbor_counts({"*..", "..*"}, {{0, 2, 1}, {1, 2, 0}}) ||
+        !has_neighbor_counts({"*.*"}, {{0, 2, 0}}) ||
+        !has_neighbor_counts({"*", ".", "*"}, {{0}, {2}, {0}}) ||
+        !has_neighbor_counts({"*"}, {{0}}) ||
+        !has_neighbor_counts({"."}, {{0}}) ||
+        !has_neighbor_counts({"..", ".."}, {{0, 0}, {0, 0}})) {
+        return 1;
+    }
+    try {
+        (void)world.count_live_neighbors(world.width(), 0);
+        std::cerr << "Neighbor counting accepted an invalid column\n";
+        return 1;
+    } catch (const std::out_of_range&) {
+    }
+    try {
+        (void)world.count_live_neighbors(0, world.height());
+        std::cerr << "Neighbor counting accepted an invalid row\n";
         return 1;
     } catch (const std::out_of_range&) {
     }

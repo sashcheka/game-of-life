@@ -2,8 +2,9 @@
 
 A C++20 console implementation of Conway's Game of Life, built incrementally.
 
-The current version stores a rectangular world and prints a built-in example.
-Simulation rules and JSON input/output will be added in subsequent steps.
+The current version stores a rectangular world, counts living neighbors, and
+prints a built-in example. Evolution rules and JSON input/output will be added
+in subsequent steps.
 
 ## Requirements
 
@@ -40,13 +41,21 @@ Game of Life: 5 x 5
 ..*..
 ..*..
 .....
+Living neighbors at (2, 2): 2
 ```
+
+Neighbor counting includes horizontal, vertical, and diagonal neighbors, excluding
+the cell itself. Cells outside the field are treated as dead; edges do not wrap.
+Queries must refer to a cell inside the field; invalid coordinates throw
+`std::out_of_range`.
 
 ## Tests
 
 After building, run `ctest --test-dir build --output-on-failure` (add `-C Debug`
 for a Visual Studio generator). Tests check dimensions, cell access, and rejection
 of invalid world data. A world with no living cells is valid; zero dimensions are not.
+Neighbor checks cover corners, edges, rectangular and one-dimensional fields,
+single-cell worlds, and fields with no living cells.
 
 ## Project structure
 
