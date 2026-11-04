@@ -2,18 +2,21 @@ cmake_minimum_required(VERSION 3.20)
 
 project(GameOfLife VERSION 0.1.0 LANGUAGES CXX)
 
-add_library(life_core src/world.cpp)
-target_include_directories(life_core PUBLIC src)
+add_library(life_core src/core/world.cpp)
+target_include_directories(life_core PUBLIC src/core)
 target_compile_features(life_core PUBLIC cxx_std_20)
 
-add_library(life_json src/json_storage.cpp)
+add_library(life_json src/storage/json_storage.cpp)
+target_include_directories(life_json PUBLIC src/storage)
 target_include_directories(life_json SYSTEM PRIVATE third_party)
 target_link_libraries(life_json PUBLIC life_core)
 
-add_library(life_terminal src/terminal_renderer.cpp)
+add_library(life_terminal src/terminal/terminal_renderer.cpp)
+target_include_directories(life_terminal PUBLIC src/terminal)
 target_link_libraries(life_terminal PUBLIC life_core)
 
-add_executable(game_of_life src/main.cpp src/application.cpp)
+add_executable(game_of_life src/main.cpp src/app/application.cpp)
+target_include_directories(game_of_life PRIVATE src/app)
 target_link_libraries(game_of_life PRIVATE life_json life_terminal)
 
 set(life_targets life_core life_json life_terminal game_of_life)
