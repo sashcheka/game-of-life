@@ -15,7 +15,7 @@ enum class CellStyle { Ascii, HalfBlocks };
 
 class TerminalRenderer {
 public:
-    explicit TerminalRenderer(bool requested = true);
+    explicit TerminalRenderer(bool requested = true, CellStyle style = CellStyle::HalfBlocks);
     ~TerminalRenderer();
     TerminalRenderer(const TerminalRenderer&) = delete;
     TerminalRenderer& operator=(const TerminalRenderer&) = delete;
@@ -26,9 +26,11 @@ public:
 
 private:
     bool active_ = false;
+    CellStyle style_;
 #ifdef _WIN32
     void* output_handle_ = nullptr;
     unsigned long original_mode_ = 0;
+    unsigned int original_code_page_ = 0;
 #endif
 };
 

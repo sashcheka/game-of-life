@@ -41,9 +41,17 @@ void print_world(const life::World& world) {
 
 int main(int argc, char* argv[]) {
     try {
-        const bool batch = argc == 2 && std::string_view(argv[1]) == "--batch";
-        if (argc != 1 && !batch) {
-            throw std::invalid_argument("Usage: game_of_life [--batch]");
+        bool batch = false;
+        auto style = life::CellStyle::HalfBlocks;
+        for (int i = 1; i < argc; ++i) {
+            const std::string_view argument(argv[i]);
+            if (argument == "--batch") {
+                batch = true;
+            } else if (argument == "--ascii") {
+                style = life::CellStyle::Ascii;
+            } else {
+                throw std::invalid_argument("Usage: game_of_life [--batch] [--ascii]");
+            }
         }
         if (std::signal(SIGINT, request_stop) == SIG_ERR ||
             std::signal(SIGTERM, request_stop) == SIG_ERR) {
@@ -60,7 +68,7 @@ int main(int argc, char* argv[]) {
 
         std::size_t generation = 0;
         {
-            life::TerminalRenderer terminal(!batch);
+            life::TerminalRenderer terminal(!batch, style);
             if (terminal.active()) {
                 terminal.draw(world, generation, config.cycles, config.fps);
             }

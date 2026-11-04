@@ -25,7 +25,9 @@ cmake --build build --config Debug
 ```
 
 Run from the repository root. Generations update in place at the configured FPS.
-Add `--batch` to calculate immediately without animation.
+Live mode uses Unicode half-blocks: two cell rows per terminal line.
+Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculation
+without animation. Both flags can be combined.
 
 ## Input and output
 

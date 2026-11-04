@@ -90,7 +90,7 @@ std::vector<std::string> format_cells(const World& world, CellStyle style,
     return draw_half_blocks(world, columns, std::min(rows, paired_rows));
 }
 
-TerminalRenderer::TerminalRenderer(bool requested) {
+TerminalRenderer::TerminalRenderer(bool requested, CellStyle style) : style_(style) {
     if (!requested) {
         return;
     }
@@ -99,6 +99,14 @@ TerminalRenderer::TerminalRenderer(bool requested) {
     if (!GetConsoleMode(output_handle_, &original_mode_) ||
         !SetConsoleMode(output_handle_, original_mode_ | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
         return;
+    }
+    if (style_ == CellStyle::HalfBlocks) {
+        const auto code_page = GetConsoleOutputCP();
+        if (code_page != 0 && SetConsoleOutputCP(CP_UTF8)) {
+            original_code_page_ = code_page;
+        } else {
+            style_ = CellStyle::Ascii;
+        }
     }
 #else
     const auto* term = std::getenv("TERM");
@@ -116,6 +124,9 @@ TerminalRenderer::~TerminalRenderer() {
         std::cout << "\x1b[?25h\x1b[?1049l" << std::flush;
 #ifdef _WIN32
         SetConsoleMode(output_handle_, original_mode_);
+        if (original_code_page_ != 0) {
+            SetConsoleOutputCP(original_code_page_);
+        }
 #endif
     }
 }
@@ -133,27 +144,28 @@ void TerminalRenderer::draw(const World& world, std::size_t generation,
     const auto columns = size.columns - 1;
     const auto rows = size.rows - 1;
     const auto visible_columns = std::min(world.width(), columns);
-    const auto visible_rows = rows > 4 ? std::min(world.height(), rows - 4) : 0;
+    const auto grid = format_cells(world, style_, columns, rows > 4 ? rows - 4 : 0);
+    const auto visible_rows = style_ == CellStyle::HalfBlocks
+        ? std::min(world.height(), grid.size() * 2) : grid.size();
     std::ostringstream content;
     content << "Game of Life | " << world.width() << " x " << world.height() << '\n'
-            << "Generation " << generation << " / " << limit << " | " << fps << " fps\n"
+            << "Generation " << generation << " / " << limit << " | " << fps << " fps | "
+            << (style_ == CellStyle::HalfBlocks ? "half-blocks" : "ASCII") << '\n'
             << "Ctrl+C to stop\n";
     if (visible_columns < world.width() || visible_rows < world.height()) {
         content << "Showing top-left " << visible_columns << " x " << visible_rows;
     }
     content << '\n';
-    for (std::size_t y = 0; y < visible_rows; ++y) {
-        for (std::size_t x = 0; x < visible_columns; ++x) {
-            content << (world.is_alive(x, y) ? '*' : '.');
-        }
-        content << '\n';
-    }
     std::istringstream lines(content.str());
     std::ostringstream frame;
     frame << "\x1b[H";
     std::string line;
     for (std::size_t y = 0; y < rows && std::getline(lines, line); ++y) {
         frame << line.substr(0, columns) << "\x1b[K\n";
+    }
+    // Grid lines are clipped by cell count before UTF-8 encoding, not by bytes.
+    for (const auto& grid_line : grid) {
+        frame << grid_line << "\x1b[K\n";
     }
     // Erase any remainder from the previous frame, for example after resizing.
     frame << "\x1b[J";
