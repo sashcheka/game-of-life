@@ -28,12 +28,9 @@ void wait_for_frame(Clock::time_point deadline) {
     }
 }
 
-void print_world(const life::World& world) {
-    for (std::size_t y = 0; y < world.height(); ++y) {
-        for (std::size_t x = 0; x < world.width(); ++x) {
-            std::cout << (world.is_alive(x, y) ? '*' : '.');
-        }
-        std::cout << '\n';
+void print_world(const life::World& world, life::CellStyle style) {
+    for (const auto& row : life::format_cells(world, style, world.width(), world.height())) {
+        std::cout << row << '\n';
     }
 }
 
@@ -59,42 +56,42 @@ int main(int argc, char* argv[]) {
         }
         auto config = life::load_config("game_of_life_input.json");
         auto& world = config.world;
+        life::TerminalRenderer terminal(!batch, style);
 
         std::cout << "Game of Life: " << world.width() << " x " << world.height() << '\n';
         std::cout << "FPS: " << config.fps << ", requested cycles: " << config.cycles << '\n';
         std::cout << "Generation 0\n";
-        print_world(world);
+        print_world(world, terminal.style());
         std::cout << "Press Ctrl+C to stop.\n" << std::flush;
 
         std::size_t generation = 0;
-        {
-            life::TerminalRenderer terminal(!batch, style);
+        terminal.start();
+        if (terminal.active()) {
+            terminal.draw(world, generation, config.cycles, config.fps);
+        }
+        const auto period = std::chrono::duration_cast<Clock::duration>(
+            std::chrono::duration<double>(1.0 / static_cast<double>(config.fps)));
+        auto next_frame = Clock::now();
+        while (!stop_requested.test() && generation < config.cycles && world.has_living_cells()) {
+            if (terminal.active()) {
+                next_frame += period;
+                wait_for_frame(next_frame);
+                if (stop_requested.test()) {
+                    break;
+                }
+            }
+            world = world.next_generation();
+            ++generation;
             if (terminal.active()) {
                 terminal.draw(world, generation, config.cycles, config.fps);
             }
-            const auto period = std::chrono::duration_cast<Clock::duration>(
-                std::chrono::duration<double>(1.0 / static_cast<double>(config.fps)));
-            auto next_frame = Clock::now();
-            while (!stop_requested.test() && generation < config.cycles && world.has_living_cells()) {
-                if (terminal.active()) {
-                    next_frame += period;
-                    wait_for_frame(next_frame);
-                    if (stop_requested.test()) {
-                        break;
-                    }
-                }
-                world = world.next_generation();
-                ++generation;
-                if (terminal.active()) {
-                    terminal.draw(world, generation, config.cycles, config.fps);
-                }
-            }
         }
+        terminal.finish();
         const bool cancelled = stop_requested.test();
         life::save_result("game_of_life_output.json", world);
         if (generation > 0) {
             std::cout << "Generation " << generation << '\n';
-            print_world(world);
+            print_world(world, terminal.style());
         }
         const char* reason = "cycle limit";
         if (cancelled) {

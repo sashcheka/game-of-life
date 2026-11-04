@@ -21,11 +21,15 @@ public:
     TerminalRenderer& operator=(const TerminalRenderer&) = delete;
 
     [[nodiscard]] bool active() const noexcept;
+    [[nodiscard]] CellStyle style() const noexcept;
+    void start();
+    void finish();
     void draw(const World& world, std::size_t generation, std::size_t limit,
               std::size_t fps) const;
 
 private:
     bool active_ = false;
+    bool screen_active_ = false;
     CellStyle style_;
 #ifdef _WIN32
     void* output_handle_ = nullptr;

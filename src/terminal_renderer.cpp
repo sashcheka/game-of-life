@@ -115,29 +115,48 @@ TerminalRenderer::TerminalRenderer(bool requested, CellStyle style) : style_(sty
     }
 #endif
     active_ = true;
-    // Use an alternate screen and hide the cursor while frames are updating.
-    std::cout << "\x1b[?1049h\x1b[?25l\x1b[2J\x1b[H" << std::flush;
 }
 
 TerminalRenderer::~TerminalRenderer() {
-    if (active_) {
-        std::cout << "\x1b[?25h\x1b[?1049l" << std::flush;
+    finish();
+    // Flush snapshots before restoring the console's original encoding.
+    std::cout << std::flush;
 #ifdef _WIN32
+    if (active_) {
         SetConsoleMode(output_handle_, original_mode_);
         if (original_code_page_ != 0) {
             SetConsoleOutputCP(original_code_page_);
         }
-#endif
     }
+#endif
 }
 
 bool TerminalRenderer::active() const noexcept {
     return active_;
 }
 
+CellStyle TerminalRenderer::style() const noexcept {
+    return active_ ? style_ : CellStyle::Ascii;
+}
+
+void TerminalRenderer::start() {
+    if (active_ && !screen_active_) {
+        screen_active_ = true;
+        // Use an alternate screen and hide the cursor while frames are updating.
+        std::cout << "\x1b[?1049h\x1b[?25l\x1b[2J\x1b[H" << std::flush;
+    }
+}
+
+void TerminalRenderer::finish() {
+    if (screen_active_) {
+        std::cout << "\x1b[?25h\x1b[?1049l" << std::flush;
+        screen_active_ = false;
+    }
+}
+
 void TerminalRenderer::draw(const World& world, std::size_t generation,
                             std::size_t limit, std::size_t fps) const {
-    if (!active_) {
+    if (!screen_active_) {
         return;
     }
     const auto size = terminal_size();
