@@ -32,7 +32,7 @@ ftxui::Component make_game_view(const Simulation& simulation, const Playback& pl
                         std::to_string(simulation.latest_generation())),
             ftxui::text(std::string(playback.playing() ? "Playing" : "Paused") +
                         " | " + std::to_string(playback.fps()) + " fps"),
-            ftxui::text("Space: play/pause | Left/Right: step | Up/Down: speed | Q: save and exit"),
+            ftxui::text("Space: play/pause | Left/Right: step/hold | Up/Down: speed | Q: save/exit"),
             ascii ? ftxui::separatorCharacter("-") : ftxui::separator(),
         };
         content.push_back(make_game_board(simulation.current_world(), style));

@@ -26,11 +26,13 @@ cmake --build build --config Debug
 
 Run from the repository root. Generations update in place at the configured FPS.
 Live mode uses Unicode half-blocks: two cell rows per terminal line.
+The board border follows the world edges; smaller terminals clip the view.
 Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculation
 without animation. Both flags can be combined. Use `--batch` for redirected output.
 
 Playback starts at the configured FPS. **Space** toggles pause; **Up/Down** changes FPS
-by one (minimum 1). **Left/Right** pauses and steps through history.
+by one (minimum 1). **Left/Right** pauses and steps through history; holding an arrow
+accelerates from 1 to 5 to 20 generations per repeat. A gap or another key resets it.
 The cycle limit or extinction pauses playback so you can rewind.
 **Q** or **Ctrl+C** saves the selected state and exits.
 
