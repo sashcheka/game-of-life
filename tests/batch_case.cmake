@@ -4,27 +4,26 @@ foreach(required IN ITEMS PROGRAM CASE TEST_DIR)
     endif()
 endforeach()
 
-set(width 5)
-set(height 5)
-set(cells
-    "....."
-    "..*.."
-    "..*.."
-    "..*.."
-    "....."
-)
-set(expected_cells
-    "....."
-    "....."
-    ".***."
-    "....."
-    "....."
-)
-set(cycles 1)
-set(expected_generation 1)
-set(expected_reason "cycle limit")
-
 if(CASE STREQUAL "blinker" OR CASE STREQUAL "redirected_auto")
+    set(width 5)
+    set(height 5)
+    set(cells
+        "....."
+        "..*.."
+        "..*.."
+        "..*.."
+        "....."
+    )
+    set(expected_cells
+        "....."
+        "....."
+        ".***."
+        "....."
+        "....."
+    )
+    set(cycles 1)
+    set(expected_generation 1)
+    set(expected_reason "cycle limit")
 
 elseif(CASE STREQUAL "empty")
     set(width 3)
@@ -51,11 +50,22 @@ elseif(CASE STREQUAL "block")
     set(expected_cells ${cells})
     set(cycles 100)
     set(expected_generation 100)
+    set(expected_reason "cycle limit")
 
 elseif(CASE STREQUAL "zero_cycles")
+    set(width 5)
+    set(height 5)
+    set(cells
+        "....."
+        "..*.."
+        "..*.."
+        "..*.."
+        "....."
+    )
     set(cycles 0)
     set(expected_generation 0)
     set(expected_cells ${cells})
+    set(expected_reason "cycle limit")
 
 elseif(CASE STREQUAL "extinction")
     set(width 1)
@@ -67,6 +77,7 @@ elseif(CASE STREQUAL "extinction")
         "."
     )
     set(cycles 100)
+    set(expected_generation 1)
     set(expected_reason "no living cells")
 
 elseif(CASE STREQUAL "rectangle")
@@ -81,12 +92,23 @@ elseif(CASE STREQUAL "rectangle")
         "..."
     )
     set(cycles 100)
+    set(expected_generation 1)
     set(expected_reason "no living cells")
 
 elseif(CASE STREQUAL "blinker_two_steps")
+    set(width 5)
+    set(height 5)
+    set(cells
+        "....."
+        "..*.."
+        "..*.."
+        "..*.."
+        "....."
+    )
     set(cycles 2)
     set(expected_generation 2)
     set(expected_cells ${cells})
+    set(expected_reason "cycle limit")
 
 elseif(CASE STREQUAL "corner_birth")
     set(width 2)
@@ -101,11 +123,33 @@ elseif(CASE STREQUAL "corner_birth")
     )
     set(cycles 2)
     set(expected_generation 2)
+    set(expected_reason "cycle limit")
 
 elseif(CASE STREQUAL "invalid_input")
+    set(width 5)
+    set(height 5)
+    set(cells
+        "....."
+        "..*.."
+        "..*.."
+        "..*.."
+        "....."
+    )
     set(cycles -1)
 
-elseif(NOT CASE STREQUAL "output_error")
+elseif(CASE STREQUAL "output_error")
+    set(width 5)
+    set(height 5)
+    set(cells
+        "....."
+        "..*.."
+        "..*.."
+        "..*.."
+        "....."
+    )
+    set(cycles 1)
+
+else()
     message(FATAL_ERROR "Unknown batch case: ${CASE}")
 endif()
 
