@@ -1,6 +1,7 @@
 # Game of Life
 
-Game of Life with configurable rules in a C++20 terminal application for macOS, Linux, and Windows.
+Game of Life with configurable rules and a wave animation mode in a C++20 terminal application
+for macOS, Linux, and Windows.
 
 Requires **CMake 3.20+**, a **C++20 compiler**, and its build tools.
 `nlohmann/json`, FTXUI, and their licenses are included in `third_party/`;
@@ -77,6 +78,18 @@ HighLife seed: [LifeWiki replicator](https://conwaylife.com/wiki/OCA:HighLife/Re
 Pattern references: [Day & Night](https://mail.conwaylife.com/wiki/OCA%3ADay_%26_Night),
 [Kok's galaxy](https://conwaylife.com/wiki/Kok%27s_galaxy),
 [Serviettes in Golly](https://golly.sourceforge.io/Help/Algorithms/QuickLife.html).
+
+## Single expanding wave
+
+```sh
+./build/game_of_life --wave --input examples/wave.json
+```
+
+This geometric animation expands one hollow ring from the center, leaving an empty
+interior. It uses the input dimensions, FPS, and cycle limit, and seeds the center
+automatically. The radius grows one cell every four generations. Playback pauses
+after the ring leaves the field; the usual pause, speed, and history controls work.
+Birth and survival options belong to Life mode and cannot be combined with `--wave`.
 
 ## Tests
 
