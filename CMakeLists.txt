@@ -22,24 +22,48 @@ target_link_libraries(game_of_life PRIVATE life_json life_terminal)
 set(life_targets life_core life_json life_terminal game_of_life)
 
 include(CTest)
+
 if(BUILD_TESTING)
     add_executable(world_tests tests/world_tests.cpp)
     target_link_libraries(world_tests PRIVATE life_core)
     add_test(NAME world_tests COMMAND world_tests)
+
     add_executable(json_storage_tests tests/json_storage_tests.cpp)
     target_link_libraries(json_storage_tests PRIVATE life_json)
     target_include_directories(json_storage_tests SYSTEM PRIVATE third_party)
     add_test(NAME json_storage_tests COMMAND json_storage_tests)
+
     add_executable(terminal_renderer_tests tests/terminal_renderer_tests.cpp)
     target_link_libraries(terminal_renderer_tests PRIVATE life_terminal)
     add_test(NAME terminal_renderer_tests COMMAND terminal_renderer_tests)
-    list(APPEND life_targets world_tests json_storage_tests terminal_renderer_tests)
-    foreach(case IN ITEMS blinker redirected_auto empty block zero_cycles extinction rectangle
-                          blinker_two_steps corner_birth output_error invalid_input)
-        add_test(NAME batch_${case} COMMAND ${CMAKE_COMMAND}
-            "-DPROGRAM=$<TARGET_FILE:game_of_life>" "-DCASE=${case}"
+
+    list(APPEND life_targets
+        world_tests
+        json_storage_tests
+        terminal_renderer_tests
+    )
+
+    foreach(case IN ITEMS
+        blinker
+        redirected_auto
+        empty
+        block
+        zero_cycles
+        extinction
+        rectangle
+        blinker_two_steps
+        corner_birth
+        output_error
+        invalid_input
+    )
+        add_test(
+            NAME batch_${case}
+            COMMAND ${CMAKE_COMMAND}
+            "-DPROGRAM=$<TARGET_FILE:game_of_life>"
+            "-DCASE=${case}"
             "-DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/batch-tests/${case}"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/batch_case.cmake")
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/batch_case.cmake"
+        )
     endforeach()
 endif()
 
