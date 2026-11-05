@@ -75,10 +75,32 @@ void check_stopping() {
     }
 }
 
+void check_custom_rules() {
+    const life::World cross({".*.", "*.*", ".*."});
+    const life::World filled({".*.", "***", ".*."});
+    life::Simulation simulation(cross, 2, life::Rules("4", "23"));
+    require(simulation.rules().notation() == "B4/S23", "Simulation lost its rules");
+    require(simulation.step_forward() && simulation.current_world() == filled,
+            "Simulation did not evolve with custom rules");
+    require(simulation.step_backward() && simulation.current_world() == cross,
+            "Custom rules broke rewind");
+    require(simulation.step_forward() && simulation.current_world() == filled &&
+            simulation.latest_generation() == 1, "Custom history was recomputed");
+
+    life::Simulation rebirth(life::World({"."}), 2, life::Rules("0", "none"));
+    require(rebirth.can_step_forward() && rebirth.step_forward() &&
+            rebirth.current_world().is_alive(0, 0), "B0 stopped at an empty generation");
+    require(rebirth.step_forward() && !rebirth.current_world().has_living_cells() &&
+            !rebirth.can_step_forward(), "B0 ignored the cycle limit");
+    require(rebirth.step_backward() && rebirth.current_world().is_alive(0, 0),
+            "B0 history was lost");
+}
+
 int main() {
     try {
         check_navigation();
         check_stopping();
+        check_custom_rules();
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
         return 1;
