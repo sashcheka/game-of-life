@@ -1,4 +1,5 @@
 #include "simulation.hpp"
+#include "wave.hpp"
 
 #include <exception>
 #include <iostream>
@@ -96,11 +97,32 @@ void check_custom_rules() {
             "B0 history was lost");
 }
 
+void check_wave_history() {
+    const life::World field({".....", ".....", ".....", ".....", "....."});
+    life::Simulation wave(life::wave_frame(field, 0), 100,
+                          life::Rules("0", "none"), life::SimulationMode::Wave);
+    require(wave.mode() == life::SimulationMode::Wave, "Wave mode was lost");
+    for (int step = 0; step < 4; ++step) {
+        require(wave.step_forward(), "The wave stopped before reaching the border");
+    }
+    require(wave.current_world() == life::wave_frame(field, 4), "Incorrect wave frame");
+    require(wave.step_backward() && wave.current_world() == life::wave_frame(field, 3),
+            "The wave could not rewind");
+    require(wave.step_forward() && wave.latest_generation() == 4, "Wave history was recomputed");
+    while (wave.generation() < 100 && wave.step_forward()) {
+    }
+    require(wave.generation() == 14 && !wave.current_world().has_living_cells(),
+            "The wave did not stop after leaving the field");
+    require(wave.step_backward() && wave.current_world().has_living_cells() &&
+            wave.step_forward(), "The completed wave could not be replayed");
+}
+
 int main() {
     try {
         check_navigation();
         check_stopping();
         check_custom_rules();
+        check_wave_history();
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
         return 1;

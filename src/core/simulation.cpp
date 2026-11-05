@@ -1,11 +1,12 @@
 #include "simulation.hpp"
+#include "wave.hpp"
 
 #include <utility>
 
 namespace life {
 
-Simulation::Simulation(World initial, std::size_t cycle_limit, Rules rules)
-    : cycle_limit_(cycle_limit), rules_(rules) {
+Simulation::Simulation(World initial, std::size_t cycle_limit, Rules rules, SimulationMode mode)
+    : cycle_limit_(cycle_limit), rules_(rules), mode_(mode) {
     history_.push_back(std::move(initial));
 }
 
@@ -25,10 +26,15 @@ const Rules& Simulation::rules() const noexcept {
     return rules_;
 }
 
+SimulationMode Simulation::mode() const noexcept {
+    return mode_;
+}
+
 bool Simulation::can_step_forward() const noexcept {
     return generation_ < latest_generation() ||
            (generation_ < cycle_limit_ &&
-            (current_world().has_living_cells() || rules_.next_state(false, 0)));
+            (current_world().has_living_cells() ||
+             (mode_ == SimulationMode::Life && rules_.next_state(false, 0))));
 }
 
 bool Simulation::step_forward() {
@@ -36,7 +42,9 @@ bool Simulation::step_forward() {
         return false;
     }
     if (generation_ == latest_generation()) {
-        history_.push_back(current_world().next_generation(rules_));
+        history_.push_back(mode_ == SimulationMode::Wave
+                               ? wave_frame(current_world(), generation_ + 1)
+                               : current_world().next_generation(rules_));
     }
     ++generation_;
     return true;
