@@ -39,6 +39,7 @@ target_link_libraries(life_terminal PUBLIC life_core ftxui)
 add_executable(game_of_life
     src/main.cpp
     src/app/application.cpp
+    src/app/interactive_game.cpp
     src/app/stop_signal.cpp
 )
 target_include_directories(game_of_life PRIVATE src/app)
