@@ -31,6 +31,7 @@ target_link_libraries(life_json PUBLIC life_core)
 add_library(life_terminal
     src/terminal/terminal_renderer.cpp
     src/terminal/game_view.cpp
+    src/terminal/game_controls.cpp
 )
 target_include_directories(life_terminal PUBLIC src/terminal)
 target_link_libraries(life_terminal PUBLIC life_core ftxui)

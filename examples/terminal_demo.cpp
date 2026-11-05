@@ -1,3 +1,4 @@
+#include "game_controls.hpp"
 #include "game_view.hpp"
 #include "json_storage.hpp"
 #include "playback.hpp"
@@ -46,38 +47,7 @@ int main() {
         auto view = life::make_game_view(simulation, playback, config.cycles,
                                          life::CellStyle::HalfBlocks);
 
-        auto controls = ftxui::CatchEvent(view, [&](ftxui::Event event) {
-            if (event == ftxui::Event::Character(' ')) {
-                if (playback.playing() || simulation.can_step_forward()) {
-                    playback.toggle();
-                }
-                return true;
-            }
-            if (event == ftxui::Event::ArrowUp) {
-                playback.increase_speed();
-                return true;
-            }
-            if (event == ftxui::Event::ArrowDown) {
-                playback.decrease_speed();
-                return true;
-            }
-            if (event == ftxui::Event::ArrowLeft) {
-                playback.pause();
-                (void)simulation.step_backward();
-                return true;
-            }
-            if (event == ftxui::Event::ArrowRight) {
-                playback.pause();
-                (void)simulation.step_forward();
-                return true;
-            }
-            if (event == ftxui::Event::Character('q') ||
-                event == ftxui::Event::Character('Q') || event == ftxui::Event::CtrlC) {
-                app.Exit();
-                return true;
-            }
-            return false;
-        });
+        auto controls = life::make_game_controls(app, view, simulation, playback);
         run_playback(app, controls, simulation, playback);
         life::save_result("game_of_life_output.json", simulation.current_world());
         std::cout << "Saved generation " << simulation.generation()
