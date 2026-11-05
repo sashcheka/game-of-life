@@ -52,6 +52,10 @@ set(life_targets life_core life_json life_terminal game_of_life)
 include(CTest)
 
 if(BUILD_TESTING)
+    add_executable(rules_tests tests/rules_tests.cpp)
+    target_link_libraries(rules_tests PRIVATE life_core)
+    add_test(NAME rules_tests COMMAND rules_tests)
+
     add_executable(world_tests tests/world_tests.cpp)
     target_link_libraries(world_tests PRIVATE life_core)
     add_test(NAME world_tests COMMAND world_tests)
@@ -82,6 +86,7 @@ if(BUILD_TESTING)
     add_test(NAME key_repeat_tests COMMAND key_repeat_tests)
 
     list(APPEND life_targets
+        rules_tests
         world_tests
         simulation_tests
         playback_tests
