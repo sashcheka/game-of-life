@@ -4,7 +4,7 @@ foreach(required IN ITEMS PROGRAM CASE TEST_DIR)
     endif()
 endforeach()
 
-if(CASE STREQUAL "blinker" OR CASE STREQUAL "redirected_auto")
+if(CASE STREQUAL "blinker" OR CASE STREQUAL "ascii")
     set(width 5)
     set(height 5)
     set(cells
@@ -181,8 +181,8 @@ string(CONFIGURE "${input_template}" input_json @ONLY)
 file(WRITE "${input_file}" "${input_json}")
 
 set(arguments --batch)
-if(CASE STREQUAL "redirected_auto")
-    set(arguments)
+if(CASE STREQUAL "ascii")
+    list(APPEND arguments --ascii)
 endif()
 execute_process(
     COMMAND "${PROGRAM}" ${arguments}
@@ -195,7 +195,7 @@ execute_process(
 
 string(ASCII 27 escape)
 if(console MATCHES "${escape}")
-    message(FATAL_ERROR "Batch or redirected output must not contain terminal controls")
+    message(FATAL_ERROR "Batch output must not contain terminal controls")
 endif()
 
 if(CASE STREQUAL "output_error" OR CASE STREQUAL "invalid_input")

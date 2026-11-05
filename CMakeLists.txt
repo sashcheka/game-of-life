@@ -84,7 +84,7 @@ if(BUILD_TESTING)
 
     foreach(case IN ITEMS
         blinker
-        redirected_auto
+        ascii
         empty
         block
         zero_cycles

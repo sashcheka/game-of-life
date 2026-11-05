@@ -1,20 +1,16 @@
 #include "application.hpp"
 
+#include "interactive_game.hpp"
 #include "json_storage.hpp"
 #include "stop_signal.hpp"
 #include "terminal_renderer.hpp"
 
-#include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
 #include <string_view>
-#include <thread>
 
 namespace {
-
-using Clock = std::chrono::steady_clock;
 
 struct RunOptions {
     bool batch = false;
@@ -43,13 +39,6 @@ RunOptions parse_options(int argc, char* argv[]) {
     return options;
 }
 
-void wait_for_frame(Clock::time_point deadline) {
-    const auto slice = std::chrono::duration_cast<Clock::duration>(std::chrono::milliseconds(10));
-    while (!life::stop_requested() && Clock::now() < deadline) {
-        std::this_thread::sleep_until(std::min(deadline, Clock::now() + slice));
-    }
-}
-
 StopReason determine_stop_reason(const life::World& world) {
     if (life::stop_requested()) {
         return StopReason::Cancelled;
@@ -60,28 +49,13 @@ StopReason determine_stop_reason(const life::World& world) {
     return StopReason::CycleLimit;
 }
 
-RunResult run_generations(life::GameConfig& config, life::TerminalRenderer& terminal) {
+RunResult run_batch(life::GameConfig& config) {
     auto& world = config.world;
     std::size_t generation = 0;
-    terminal.start();
-    terminal.draw(world, generation, config.cycles, config.fps);
-
-    const auto period = std::chrono::duration_cast<Clock::duration>(
-        std::chrono::duration<double>(1.0 / static_cast<double>(config.fps)));
-    auto next_frame = Clock::now();
     while (!life::stop_requested() && generation < config.cycles && world.has_living_cells()) {
-        if (terminal.active()) {
-            next_frame += period;
-            wait_for_frame(next_frame);
-            if (life::stop_requested()) {
-                break;
-            }
-        }
         world = world.next_generation();
         ++generation;
-        terminal.draw(world, generation, config.cycles, config.fps);
     }
-    terminal.finish();
     return {generation, determine_stop_reason(world)};
 }
 
@@ -124,12 +98,18 @@ void run_application(int argc, char* argv[]) {
     const auto options = parse_options(argc, argv);
     install_stop_handlers();
     auto config = load_config("game_of_life_input.json");
-    TerminalRenderer terminal(!options.batch, options.style);
+    if (!options.batch) {
+        const auto generation = run_interactive(config.world, config.cycles, config.fps,
+                                                options.style);
+        save_result("game_of_life_output.json", config.world);
+        std::cout << "Saved generation " << generation << " to game_of_life_output.json\n";
+        return;
+    }
 
-    print_initial_state(config, terminal.style());
-    const auto result = run_generations(config, terminal);
+    print_initial_state(config, CellStyle::Ascii);
+    const auto result = run_batch(config);
     save_result("game_of_life_output.json", config.world);
-    print_final_state(config.world, result, terminal.style());
+    print_final_state(config.world, result, CellStyle::Ascii);
 }
 
 } // namespace life
