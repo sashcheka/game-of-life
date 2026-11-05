@@ -15,7 +15,11 @@ if(MSVC)
     target_compile_options(ftxui PRIVATE /utf-8)
 endif()
 
-add_library(life_core src/core/world.cpp src/core/simulation.cpp)
+add_library(life_core
+    src/core/world.cpp
+    src/core/simulation.cpp
+    src/core/playback.cpp
+)
 target_include_directories(life_core PUBLIC src/core)
 target_compile_features(life_core PUBLIC cxx_std_20)
 
