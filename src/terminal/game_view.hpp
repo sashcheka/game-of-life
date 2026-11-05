@@ -2,7 +2,7 @@
 
 #include "playback.hpp"
 #include "simulation.hpp"
-#include "terminal_renderer.hpp"
+#include "cell_formatter.hpp"
 
 #include <ftxui.hpp>
 

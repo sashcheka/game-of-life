@@ -29,7 +29,7 @@ target_include_directories(life_json SYSTEM PRIVATE third_party)
 target_link_libraries(life_json PUBLIC life_core)
 
 add_library(life_terminal
-    src/terminal/terminal_renderer.cpp
+    src/terminal/cell_formatter.cpp
     src/terminal/game_view.cpp
     src/terminal/game_controls.cpp
 )
@@ -70,16 +70,16 @@ if(BUILD_TESTING)
     target_include_directories(json_storage_tests SYSTEM PRIVATE third_party)
     add_test(NAME json_storage_tests COMMAND json_storage_tests)
 
-    add_executable(terminal_renderer_tests tests/terminal_renderer_tests.cpp)
-    target_link_libraries(terminal_renderer_tests PRIVATE life_terminal)
-    add_test(NAME terminal_renderer_tests COMMAND terminal_renderer_tests)
+    add_executable(cell_formatter_tests tests/cell_formatter_tests.cpp)
+    target_link_libraries(cell_formatter_tests PRIVATE life_terminal)
+    add_test(NAME cell_formatter_tests COMMAND cell_formatter_tests)
 
     list(APPEND life_targets
         world_tests
         simulation_tests
         playback_tests
         json_storage_tests
-        terminal_renderer_tests
+        cell_formatter_tests
     )
 
     foreach(case IN ITEMS

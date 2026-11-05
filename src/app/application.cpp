@@ -3,7 +3,7 @@
 #include "interactive_game.hpp"
 #include "json_storage.hpp"
 #include "stop_signal.hpp"
-#include "terminal_renderer.hpp"
+#include "cell_formatter.hpp"
 
 #include <cstddef>
 #include <iostream>

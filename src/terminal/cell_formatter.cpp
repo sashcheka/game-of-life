@@ -1,4 +1,4 @@
-#include "terminal_renderer.hpp"
+#include "cell_formatter.hpp"
 
 #include <algorithm>
 #include <string>

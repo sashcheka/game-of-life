@@ -1,6 +1,6 @@
 #pragma once
 
-#include "terminal_renderer.hpp"
+#include "cell_formatter.hpp"
 
 #include <cstddef>
 
