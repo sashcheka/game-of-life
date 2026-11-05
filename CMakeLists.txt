@@ -116,6 +116,9 @@ if(BUILD_TESTING)
         seeds
         birth_four
         rebirth
+        wave_ring
+        wave_end
+        wave_zero
         output_error
         invalid_input
     )
@@ -130,7 +133,7 @@ if(BUILD_TESTING)
     endforeach()
 
     foreach(case IN ITEMS missing_birth missing_survive missing_input invalid_birth
-                          invalid_survive unknown_option missing_file)
+                          invalid_survive unknown_option missing_file wave_birth wave_survive)
         add_test(NAME cli_${case} COMMAND ${CMAKE_COMMAND}
             "-DPROGRAM=$<TARGET_FILE:game_of_life>" "-DCASE=${case}"
             "-DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/cli-tests/${case}"

@@ -141,7 +141,7 @@ elseif(CASE STREQUAL "highlife")
     set(cycles 1)
     set(expected_generation 1)
     set(expected_reason "cycle limit")
-    set(rule_arguments --birth 36 --survive 23)
+    set(extra_arguments --birth 36 --survive 23)
 
 elseif(CASE STREQUAL "seeds")
     set(width 3)
@@ -159,7 +159,7 @@ elseif(CASE STREQUAL "seeds")
     set(cycles 1)
     set(expected_generation 1)
     set(expected_reason "cycle limit")
-    set(rule_arguments --birth 2 --survive none)
+    set(extra_arguments --birth 2 --survive none)
 
 elseif(CASE STREQUAL "birth_four")
     set(width 3)
@@ -177,7 +177,7 @@ elseif(CASE STREQUAL "birth_four")
     set(cycles 1)
     set(expected_generation 1)
     set(expected_reason "cycle limit")
-    set(rule_arguments --birth 4 --survive 23)
+    set(extra_arguments --birth 4 --survive 23)
 
 elseif(CASE STREQUAL "rebirth")
     set(width 1)
@@ -189,7 +189,59 @@ elseif(CASE STREQUAL "rebirth")
     set(cycles 2)
     set(expected_generation 2)
     set(expected_reason "cycle limit")
-    set(rule_arguments --birth 0 --survive none)
+    set(extra_arguments --birth 0 --survive none)
+
+elseif(CASE STREQUAL "wave_ring")
+    set(width 5)
+    set(height 5)
+    set(cells
+        "*****"
+        "*****"
+        "*****"
+        "*****"
+        "*****"
+    )
+    set(expected_cells
+        ".***."
+        "*...*"
+        "*...*"
+        "*...*"
+        ".***."
+    )
+    set(cycles 8)
+    set(expected_generation 8)
+    set(expected_reason "cycle limit")
+    set(extra_arguments --wave)
+
+elseif(CASE STREQUAL "wave_end")
+    set(width 1)
+    set(height 1)
+    set(cells
+        "*"
+    )
+    set(expected_cells
+        "."
+    )
+    set(cycles 100)
+    set(expected_generation 3)
+    set(expected_reason "no living cells")
+    set(extra_arguments --wave)
+
+elseif(CASE STREQUAL "wave_zero")
+    set(width 2)
+    set(height 2)
+    set(cells
+        "**"
+        "**"
+    )
+    set(expected_cells
+        ".."
+        ".*"
+    )
+    set(cycles 0)
+    set(expected_generation 0)
+    set(expected_reason "cycle limit")
+    set(extra_arguments --wave)
 
 elseif(CASE STREQUAL "invalid_input")
     set(width 5)
@@ -221,7 +273,7 @@ endif()
 
 file(MAKE_DIRECTORY "${TEST_DIR}")
 set(input_file "${TEST_DIR}/game_of_life_input.json")
-if(DEFINED rule_arguments)
+if(DEFINED extra_arguments)
     file(REMOVE "${input_file}")
     set(input_file "${TEST_DIR}/custom input.json")
 endif()
@@ -251,8 +303,8 @@ string(CONFIGURE "${input_template}" input_json @ONLY)
 file(WRITE "${input_file}" "${input_json}")
 
 set(arguments --batch)
-if(DEFINED rule_arguments)
-    list(APPEND arguments ${rule_arguments} --input "${input_file}")
+if(DEFINED extra_arguments)
+    list(APPEND arguments ${extra_arguments} --input "${input_file}")
 endif()
 if(CASE STREQUAL "ascii")
     list(APPEND arguments --ascii)
@@ -269,6 +321,9 @@ execute_process(
 string(ASCII 27 escape)
 if(console MATCHES "${escape}")
     message(FATAL_ERROR "Batch output must not contain terminal controls")
+endif()
+if(CASE MATCHES "^wave_" AND NOT console MATCHES "Mode: Wave")
+    message(FATAL_ERROR "Wave mode was not displayed")
 endif()
 
 if(CASE STREQUAL "output_error" OR CASE STREQUAL "invalid_input")
