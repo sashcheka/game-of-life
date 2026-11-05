@@ -39,8 +39,8 @@ void run_playback(ftxui::App& app, const ftxui::Component& controls,
 } // namespace
 
 std::size_t run_interactive(World& world, std::size_t cycles, std::size_t fps,
-                            CellStyle style, const Rules& rules) {
-    Simulation simulation(world, cycles, rules);
+                            CellStyle style, const Rules& rules, SimulationMode mode) {
+    Simulation simulation(world, cycles, rules, mode);
     Playback playback(fps);
     if (!simulation.can_step_forward()) {
         playback.pause();
