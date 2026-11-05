@@ -1,11 +1,9 @@
-# Check the arguments passed by add_test().
 foreach(required IN ITEMS PROGRAM CASE TEST_DIR)
     if(NOT DEFINED ${required})
         message(FATAL_ERROR "Missing test parameter: ${required}")
     endif()
 endforeach()
 
-# Choose input and expected output. Defaults: a blinker after one step.
 set(width 5)
 set(height 5)
 set(cells
@@ -27,7 +25,6 @@ set(expected_generation 1)
 set(expected_reason "cycle limit")
 
 if(CASE STREQUAL "blinker" OR CASE STREQUAL "redirected_auto")
-    # Defaults are the first sample from the assignment.
 
 elseif(CASE STREQUAL "empty")
     set(width 3)
@@ -112,13 +109,11 @@ elseif(NOT CASE STREQUAL "output_error")
     message(FATAL_ERROR "Unknown batch case: ${CASE}")
 endif()
 
-# Prepare an isolated directory and the input JSON.
 file(MAKE_DIRECTORY "${TEST_DIR}")
 set(input_file "${TEST_DIR}/game_of_life_input.json")
 set(output_file "${TEST_DIR}/game_of_life_output.json")
 
 if(CASE STREQUAL "output_error")
-    # A directory at the output path makes opening the file fail.
     file(MAKE_DIRECTORY "${output_file}")
 else()
     file(REMOVE "${output_file}")
@@ -138,14 +133,11 @@ set(input_template [=[
     }
 }
 ]=])
-# Replace @name@ placeholders with the selected case values.
 string(CONFIGURE "${input_template}" input_json @ONLY)
 file(WRITE "${input_file}" "${input_json}")
 
-# Run the application and capture its exit code, stdout, and stderr.
 set(arguments --batch)
 if(CASE STREQUAL "redirected_auto")
-    # With stdout captured, the application should select batch mode itself.
     set(arguments)
 endif()
 execute_process(
@@ -157,13 +149,11 @@ execute_process(
     TIMEOUT 10
 )
 
-# Batch output must not contain terminal escape sequences.
 string(ASCII 27 escape)
 if(console MATCHES "${escape}")
     message(FATAL_ERROR "Batch or redirected output must not contain terminal controls")
 endif()
 
-# Error cases must fail with a useful message.
 if(CASE STREQUAL "output_error" OR CASE STREQUAL "invalid_input")
     if(NOT status STREQUAL "1")
         message(FATAL_ERROR "Expected exit code 1, got ${status}: ${error}")
@@ -182,7 +172,6 @@ if(CASE STREQUAL "output_error" OR CASE STREQUAL "invalid_input")
     return()
 endif()
 
-# Successful cases must save the expected world and report why they stopped.
 if(NOT status STREQUAL "0")
     message(FATAL_ERROR "Application failed: ${status}: ${error}")
 endif()
