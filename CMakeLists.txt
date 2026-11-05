@@ -106,6 +106,10 @@ if(BUILD_TESTING)
         rectangle
         blinker_two_steps
         corner_birth
+        highlife
+        seeds
+        birth_four
+        rebirth
         output_error
         invalid_input
     )

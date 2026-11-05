@@ -125,6 +125,72 @@ elseif(CASE STREQUAL "corner_birth")
     set(expected_generation 2)
     set(expected_reason "cycle limit")
 
+elseif(CASE STREQUAL "highlife")
+    set(width 3)
+    set(height 3)
+    set(cells
+        "***"
+        "*.*"
+        ".*."
+    )
+    set(expected_cells
+        "*.*"
+        "***"
+        ".*."
+    )
+    set(cycles 1)
+    set(expected_generation 1)
+    set(expected_reason "cycle limit")
+    set(rule_arguments --birth 36 --survive 23)
+
+elseif(CASE STREQUAL "seeds")
+    set(width 3)
+    set(height 3)
+    set(cells
+        "..."
+        "**."
+        "..."
+    )
+    set(expected_cells
+        "**."
+        "..."
+        "**."
+    )
+    set(cycles 1)
+    set(expected_generation 1)
+    set(expected_reason "cycle limit")
+    set(rule_arguments --birth 2 --survive none)
+
+elseif(CASE STREQUAL "birth_four")
+    set(width 3)
+    set(height 3)
+    set(cells
+        ".*."
+        "*.*"
+        ".*."
+    )
+    set(expected_cells
+        ".*."
+        "***"
+        ".*."
+    )
+    set(cycles 1)
+    set(expected_generation 1)
+    set(expected_reason "cycle limit")
+    set(rule_arguments --birth 4 --survive 23)
+
+elseif(CASE STREQUAL "rebirth")
+    set(width 1)
+    set(height 1)
+    set(cells
+        "."
+    )
+    set(expected_cells ${cells})
+    set(cycles 2)
+    set(expected_generation 2)
+    set(expected_reason "cycle limit")
+    set(rule_arguments --birth 0 --survive none)
+
 elseif(CASE STREQUAL "invalid_input")
     set(width 5)
     set(height 5)
@@ -155,6 +221,10 @@ endif()
 
 file(MAKE_DIRECTORY "${TEST_DIR}")
 set(input_file "${TEST_DIR}/game_of_life_input.json")
+if(DEFINED rule_arguments)
+    file(REMOVE "${input_file}")
+    set(input_file "${TEST_DIR}/custom input.json")
+endif()
 set(output_file "${TEST_DIR}/game_of_life_output.json")
 
 if(CASE STREQUAL "output_error")
@@ -181,6 +251,9 @@ string(CONFIGURE "${input_template}" input_json @ONLY)
 file(WRITE "${input_file}" "${input_json}")
 
 set(arguments --batch)
+if(DEFINED rule_arguments)
+    list(APPEND arguments ${rule_arguments} --input "${input_file}")
+endif()
 if(CASE STREQUAL "ascii")
     list(APPEND arguments --ascii)
 endif()
