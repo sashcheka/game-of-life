@@ -32,7 +32,11 @@ if(CASE STREQUAL "blinker" OR CASE STREQUAL "redirected_auto")
 elseif(CASE STREQUAL "empty")
     set(width 3)
     set(height 3)
-    set(cells "..." "..." "...")
+    set(cells
+        "..."
+        "..."
+        "..."
+    )
     set(expected_cells ${cells})
     set(cycles 10)
     set(expected_generation 0)
@@ -41,7 +45,12 @@ elseif(CASE STREQUAL "empty")
 elseif(CASE STREQUAL "block")
     set(width 4)
     set(height 4)
-    set(cells "...." ".**." ".**." "....")
+    set(cells
+        "...."
+        ".**."
+        ".**."
+        "...."
+    )
     set(expected_cells ${cells})
     set(cycles 100)
     set(expected_generation 100)
@@ -54,16 +63,26 @@ elseif(CASE STREQUAL "zero_cycles")
 elseif(CASE STREQUAL "extinction")
     set(width 1)
     set(height 1)
-    set(cells "*")
-    set(expected_cells ".")
+    set(cells
+        "*"
+    )
+    set(expected_cells
+        "."
+    )
     set(cycles 100)
     set(expected_reason "no living cells")
 
 elseif(CASE STREQUAL "rectangle")
     set(width 3)
     set(height 2)
-    set(cells "*.." "..*")
-    set(expected_cells "..." "...")
+    set(cells
+        "*.."
+        "..*"
+    )
+    set(expected_cells
+        "..."
+        "..."
+    )
     set(cycles 100)
     set(expected_reason "no living cells")
 
@@ -75,8 +94,14 @@ elseif(CASE STREQUAL "blinker_two_steps")
 elseif(CASE STREQUAL "corner_birth")
     set(width 2)
     set(height 2)
-    set(cells "**" "*.")
-    set(expected_cells "**" "**")
+    set(cells
+        "**"
+        "*."
+    )
+    set(expected_cells
+        "**"
+        "**"
+    )
     set(cycles 2)
     set(expected_generation 2)
 
