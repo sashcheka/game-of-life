@@ -45,10 +45,7 @@ add_executable(game_of_life
 target_include_directories(game_of_life PRIVATE src/app)
 target_link_libraries(game_of_life PRIVATE life_json life_terminal)
 
-add_executable(terminal_demo examples/terminal_demo.cpp)
-target_link_libraries(terminal_demo PRIVATE life_json life_terminal ftxui)
-
-set(life_targets life_core life_json life_terminal game_of_life terminal_demo)
+set(life_targets life_core life_json life_terminal game_of_life)
 
 include(CTest)
 

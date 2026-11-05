@@ -27,9 +27,8 @@ cmake --build build --config Debug
 Run from the repository root. Generations update in place at the configured FPS.
 Live mode uses Unicode half-blocks: two cell rows per terminal line.
 Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculation
-without animation. Both flags can be combined.
+without animation. Both flags can be combined. Use `--batch` for redirected output.
 
-FTXUI prototype: run `./build/terminal_demo` (Windows: `.\build\Debug\terminal_demo.exe`).
 Playback starts at the configured FPS. **Space** toggles pause; **Up/Down** changes FPS
 by one (minimum 1). **Left/Right** pauses and steps through history.
 The cycle limit or extinction pauses playback so you can rewind.
@@ -44,9 +43,10 @@ Edit `game_of_life_input.json`:
 - `simulation.fps`: positive integer controlling live playback speed.
 - `simulation.cycles`: nonnegative integer limiting steps; `0` keeps the initial state.
 
-Field edges do not wrap. The game stops at the cycle limit, when all cells die,
-or on **Ctrl+C**, and saves `game_of_life_output.json`. Cancellation finishes the
-current generation before saving. Resize the terminal to see more of a large field.
+Field edges do not wrap. Reaching the cycle limit or extinction saves
+`game_of_life_output.json`: interactive mode pauses for rewinding; batch mode exits.
+Quitting saves the currently selected generation. Ctrl+C also stops batch runs
+after the current generation. Resize the terminal to see more of a large field.
 
 ## Tests
 
