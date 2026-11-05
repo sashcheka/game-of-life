@@ -38,7 +38,7 @@
         ]
     },
     "simulation": {
-        "fps": 10,
-        "cycles": 240
+        "fps": 30,
+        "cycles": 6000
     }
 }
