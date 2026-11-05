@@ -7,11 +7,37 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <system_error>
 #include <utility>
 #include <vector>
 
 namespace life {
 namespace {
+
+std::filesystem::path create_temporary_directory(const std::filesystem::path& output) {
+    for (int attempt = 0; attempt < 100; ++attempt) {
+        auto directory = output;
+        directory += ".tmp-" + std::to_string(attempt);
+        std::error_code error;
+        if (std::filesystem::create_directory(directory, error)) {
+            return directory;
+        }
+        if (error && error != std::errc::file_exists) {
+            throw std::runtime_error("Cannot create temporary output directory: " +
+                                     error.message());
+        }
+    }
+    throw std::runtime_error("Cannot reserve a temporary output directory");
+}
+
+struct TemporaryDirectory {
+    std::filesystem::path path;
+
+    ~TemporaryDirectory() {
+        std::error_code ignored;
+        std::filesystem::remove_all(path, ignored);
+    }
+};
 
 std::size_t read_integer(const nlohmann::json& object, const char* key,
                          std::size_t minimum) {
@@ -79,7 +105,9 @@ void write_result(std::ostream& output, const World& world) {
 }
 
 void save_result(const std::filesystem::path& path, const World& world) {
-    std::ofstream output(path);
+    const TemporaryDirectory temporary{create_temporary_directory(path)};
+    const auto temporary_file = temporary.path / "result.json";
+    std::ofstream output(temporary_file);
     if (!output.is_open()) {
         throw std::runtime_error("Cannot open output file: " + path.string());
     }
@@ -87,6 +115,12 @@ void save_result(const std::filesystem::path& path, const World& world) {
     output.close();
     if (!output) {
         throw std::runtime_error("Cannot finish writing output file: " + path.string());
+    }
+    std::error_code error;
+    std::filesystem::rename(temporary_file, path, error);
+    if (error) {
+        throw std::runtime_error("Cannot replace output file: " + path.string() + ": " +
+                                 error.message());
     }
 }
 
