@@ -30,7 +30,8 @@ Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculat
 without animation. Both flags can be combined.
 
 FTXUI prototype: run `./build/terminal_demo` (Windows: `.\build\Debug\terminal_demo.exe`).
-It displays the input field without evolution. Press **Q** or **Ctrl+C** to exit.
+Use **Left/Right** to navigate generations. The header shows the current and last
+computed generation. **Q** or **Ctrl+C** saves the selected state and exits.
 
 ## Input and output
 
