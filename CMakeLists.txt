@@ -17,6 +17,7 @@ endif()
 
 add_library(life_core
     src/core/rules.cpp
+    src/core/wave.cpp
     src/core/world.cpp
     src/core/simulation.cpp
     src/core/playback.cpp
@@ -52,6 +53,10 @@ set(life_targets life_core life_json life_terminal game_of_life)
 include(CTest)
 
 if(BUILD_TESTING)
+    add_executable(wave_tests tests/wave_tests.cpp)
+    target_link_libraries(wave_tests PRIVATE life_core)
+    add_test(NAME wave_tests COMMAND wave_tests)
+
     add_executable(rules_tests tests/rules_tests.cpp)
     target_link_libraries(rules_tests PRIVATE life_core)
     add_test(NAME rules_tests COMMAND rules_tests)
@@ -86,6 +91,7 @@ if(BUILD_TESTING)
     add_test(NAME key_repeat_tests COMMAND key_repeat_tests)
 
     list(APPEND life_targets
+        wave_tests
         rules_tests
         world_tests
         simulation_tests
