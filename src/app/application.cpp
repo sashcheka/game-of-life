@@ -82,7 +82,7 @@ StopReason determine_stop_reason(const life::World& world, bool can_revive) {
 RunResult run_batch(life::GameConfig& config, const RunOptions& options) {
     auto& world = config.world;
     std::size_t generation = 0;
-    const bool can_revive = options.mode == life::SimulationMode::Life &&
+    const bool can_revive = options.mode == life::SimulationMode::Wave ||
                             options.rules.next_state(false, 0);
     while (!life::stop_requested() && generation < config.cycles &&
            (world.has_living_cells() || can_revive)) {

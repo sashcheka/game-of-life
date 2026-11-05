@@ -109,10 +109,19 @@ void check_wave_history() {
     require(wave.step_backward() && wave.current_world() == life::wave_frame(field, 3),
             "The wave could not rewind");
     require(wave.step_forward() && wave.latest_generation() == 4, "Wave history was recomputed");
+    while (wave.generation() < 20) {
+        require(wave.step_forward(), "Wave source stopped during an empty interval");
+    }
+    require(!wave.current_world().has_living_cells() && wave.can_step_forward(),
+            "An empty interval stopped the source");
+    while (wave.generation() < 32) {
+        require(wave.step_forward(), "The source did not reach its next emission");
+    }
+    require(wave.current_world() == life::wave_frame(field, 0), "The second pulse was lost");
     while (wave.generation() < 100 && wave.step_forward()) {
     }
-    require(wave.generation() == 14 && !wave.current_world().has_living_cells(),
-            "The wave did not stop after leaving the field");
+    require(wave.generation() == 100 && !wave.can_step_forward(),
+            "The wave source ignored the cycle limit");
     require(wave.step_backward() && wave.current_world().has_living_cells() &&
             wave.step_forward(), "The completed wave could not be replayed");
 }

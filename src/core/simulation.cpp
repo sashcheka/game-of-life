@@ -33,8 +33,8 @@ SimulationMode Simulation::mode() const noexcept {
 bool Simulation::can_step_forward() const noexcept {
     return generation_ < latest_generation() ||
            (generation_ < cycle_limit_ &&
-            (current_world().has_living_cells() ||
-             (mode_ == SimulationMode::Life && rules_.next_state(false, 0))));
+            (mode_ == SimulationMode::Wave || current_world().has_living_cells() ||
+             rules_.next_state(false, 0)));
 }
 
 bool Simulation::step_forward() {

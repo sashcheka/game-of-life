@@ -79,16 +79,17 @@ Pattern references: [Day & Night](https://mail.conwaylife.com/wiki/OCA%3ADay_%26
 [Kok's galaxy](https://conwaylife.com/wiki/Kok%27s_galaxy),
 [Serviettes in Golly](https://golly.sourceforge.io/Help/Algorithms/QuickLife.html).
 
-## Single expanding wave
+## Repeating wave source
 
 ```sh
 ./build/game_of_life --wave --input examples/wave.json
 ```
 
-This geometric animation expands one hollow ring from the center, leaving an empty
-interior. It uses the input dimensions, FPS, and cycle limit, and seeds the center
-automatically. The radius grows one cell every four generations. Playback pauses
-after the ring leaves the field; the usual pause, speed, and history controls work.
+This geometric animation emits a hollow ring from the center every 32 generations.
+Older rings keep expanding, with empty space between them. Each radius grows one
+cell every four generations; neighboring radii differ by 8 cells. The input supplies the
+field dimensions, FPS, and cycle limit. Playback continues through empty intervals
+until the cycle limit; the usual pause, speed, and history controls work.
 Birth and survival options belong to Life mode and cannot be combined with `--wave`.
 
 ## Tests

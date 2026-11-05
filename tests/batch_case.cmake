@@ -220,11 +220,11 @@ elseif(CASE STREQUAL "wave_end")
         "*"
     )
     set(expected_cells
-        "."
+        "*"
     )
-    set(cycles 100)
-    set(expected_generation 3)
-    set(expected_reason "no living cells")
+    set(cycles 64)
+    set(expected_generation 64)
+    set(expected_reason "cycle limit")
     set(extra_arguments --wave)
 
 elseif(CASE STREQUAL "wave_zero")
