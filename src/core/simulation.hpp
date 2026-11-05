@@ -14,6 +14,7 @@ public:
     [[nodiscard]] const World& current_world() const noexcept;
     [[nodiscard]] std::size_t generation() const noexcept;
     [[nodiscard]] std::size_t latest_generation() const noexcept;
+    [[nodiscard]] bool can_step_forward() const noexcept;
     [[nodiscard]] bool step_forward();
     [[nodiscard]] bool step_backward() noexcept;
 

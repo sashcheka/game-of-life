@@ -20,15 +20,18 @@ std::size_t Simulation::latest_generation() const noexcept {
     return history_.size() - 1;
 }
 
+bool Simulation::can_step_forward() const noexcept {
+    return generation_ < latest_generation() ||
+           (generation_ < cycle_limit_ && current_world().has_living_cells());
+}
+
 bool Simulation::step_forward() {
-    if (generation_ < latest_generation()) {
-        ++generation_;
-        return true;
-    }
-    if (generation_ >= cycle_limit_ || !current_world().has_living_cells()) {
+    if (!can_step_forward()) {
         return false;
     }
-    history_.push_back(current_world().next_generation());
+    if (generation_ == latest_generation()) {
+        history_.push_back(current_world().next_generation());
+    }
     ++generation_;
     return true;
 }
