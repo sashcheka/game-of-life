@@ -3,8 +3,8 @@
 Conway's Game of Life in a C++20 terminal application for macOS, Linux, and Windows.
 
 Requires **CMake 3.20+**, a **C++20 compiler**, and its build tools.
-`nlohmann/json` and its MIT license are included in `third_party/`; no dependency
-installation is needed.
+`nlohmann/json`, FTXUI, and their licenses are included in `third_party/`;
+no dependency installation or network access is needed during the build.
 
 ## Build and run
 
@@ -28,6 +28,9 @@ Run from the repository root. Generations update in place at the configured FPS.
 Live mode uses Unicode half-blocks: two cell rows per terminal line.
 Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculation
 without animation. Both flags can be combined.
+
+FTXUI prototype: run `./build/terminal_demo` (Windows: `.\build\Debug\terminal_demo.exe`).
+It displays the input field without evolution. Press **Q** or **Ctrl+C** to exit.
 
 ## Input and output
 

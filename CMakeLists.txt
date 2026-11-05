@@ -2,6 +2,19 @@ cmake_minimum_required(VERSION 3.20)
 
 project(GameOfLife VERSION 0.1.0 LANGUAGES CXX)
 
+find_package(Threads REQUIRED)
+add_library(ftxui STATIC third_party/ftxui/ftxui.cpp)
+target_include_directories(ftxui SYSTEM PUBLIC third_party/ftxui)
+target_compile_features(ftxui PUBLIC cxx_std_20)
+target_link_libraries(ftxui PRIVATE Threads::Threads)
+set_target_properties(ftxui PROPERTIES CXX_EXTENSIONS OFF)
+if(WIN32)
+    target_compile_definitions(ftxui PUBLIC UNICODE _UNICODE NOMINMAX)
+endif()
+if(MSVC)
+    target_compile_options(ftxui PRIVATE /utf-8)
+endif()
+
 add_library(life_core src/core/world.cpp)
 target_include_directories(life_core PUBLIC src/core)
 target_compile_features(life_core PUBLIC cxx_std_20)
@@ -19,7 +32,10 @@ add_executable(game_of_life src/main.cpp src/app/application.cpp)
 target_include_directories(game_of_life PRIVATE src/app)
 target_link_libraries(game_of_life PRIVATE life_json life_terminal)
 
-set(life_targets life_core life_json life_terminal game_of_life)
+add_executable(terminal_demo examples/terminal_demo.cpp)
+target_link_libraries(terminal_demo PRIVATE life_json life_terminal ftxui)
+
+set(life_targets life_core life_json life_terminal game_of_life terminal_demo)
 
 include(CTest)
 
