@@ -52,6 +52,10 @@ if(BUILD_TESTING)
     target_link_libraries(simulation_tests PRIVATE life_core)
     add_test(NAME simulation_tests COMMAND simulation_tests)
 
+    add_executable(playback_tests tests/playback_tests.cpp)
+    target_link_libraries(playback_tests PRIVATE life_core)
+    add_test(NAME playback_tests COMMAND playback_tests)
+
     add_executable(json_storage_tests tests/json_storage_tests.cpp)
     target_link_libraries(json_storage_tests PRIVATE life_json)
     target_include_directories(json_storage_tests SYSTEM PRIVATE third_party)
@@ -64,6 +68,7 @@ if(BUILD_TESTING)
     list(APPEND life_targets
         world_tests
         simulation_tests
+        playback_tests
         json_storage_tests
         terminal_renderer_tests
     )
