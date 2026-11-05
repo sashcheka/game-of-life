@@ -32,6 +32,7 @@ add_library(life_terminal
     src/terminal/cell_formatter.cpp
     src/terminal/game_view.cpp
     src/terminal/game_controls.cpp
+    src/terminal/key_repeat.cpp
 )
 target_include_directories(life_terminal PUBLIC src/terminal)
 target_link_libraries(life_terminal PUBLIC life_core ftxui)
