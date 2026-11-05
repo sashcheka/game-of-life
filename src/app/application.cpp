@@ -1,12 +1,11 @@
 #include "application.hpp"
 
 #include "json_storage.hpp"
+#include "stop_signal.hpp"
 #include "terminal_renderer.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <chrono>
-#include <csignal>
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
@@ -15,7 +14,6 @@
 
 namespace {
 
-std::atomic_flag stop_requested{};
 using Clock = std::chrono::steady_clock;
 
 struct RunOptions {
@@ -45,26 +43,15 @@ RunOptions parse_options(int argc, char* argv[]) {
     return options;
 }
 
-extern "C" void request_stop(int) {
-    (void)stop_requested.test_and_set();
-}
-
-void install_stop_handlers() {
-    if (std::signal(SIGINT, request_stop) == SIG_ERR ||
-        std::signal(SIGTERM, request_stop) == SIG_ERR) {
-        throw std::runtime_error("Cannot install stop handlers");
-    }
-}
-
 void wait_for_frame(Clock::time_point deadline) {
     const auto slice = std::chrono::duration_cast<Clock::duration>(std::chrono::milliseconds(10));
-    while (!stop_requested.test() && Clock::now() < deadline) {
+    while (!life::stop_requested() && Clock::now() < deadline) {
         std::this_thread::sleep_until(std::min(deadline, Clock::now() + slice));
     }
 }
 
 StopReason determine_stop_reason(const life::World& world) {
-    if (stop_requested.test()) {
+    if (life::stop_requested()) {
         return StopReason::Cancelled;
     }
     if (!world.has_living_cells()) {
@@ -82,11 +69,11 @@ RunResult run_generations(life::GameConfig& config, life::TerminalRenderer& term
     const auto period = std::chrono::duration_cast<Clock::duration>(
         std::chrono::duration<double>(1.0 / static_cast<double>(config.fps)));
     auto next_frame = Clock::now();
-    while (!stop_requested.test() && generation < config.cycles && world.has_living_cells()) {
+    while (!life::stop_requested() && generation < config.cycles && world.has_living_cells()) {
         if (terminal.active()) {
             next_frame += period;
             wait_for_frame(next_frame);
-            if (stop_requested.test()) {
+            if (life::stop_requested()) {
                 break;
             }
         }
