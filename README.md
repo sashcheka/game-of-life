@@ -30,8 +30,10 @@ Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculat
 without animation. Both flags can be combined.
 
 FTXUI prototype: run `./build/terminal_demo` (Windows: `.\build\Debug\terminal_demo.exe`).
-Use **Left/Right** to navigate generations. The header shows the current and last
-computed generation. **Q** or **Ctrl+C** saves the selected state and exits.
+Playback starts at the configured FPS. **Space** toggles pause; **+/-** changes FPS
+by one (minimum 1). **Left/Right** pauses and steps through history.
+The cycle limit or extinction pauses playback so you can rewind.
+**Q** or **Ctrl+C** saves the selected state and exits.
 
 ## Input and output
 

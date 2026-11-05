@@ -21,6 +21,9 @@ void check_timing() {
     require(!playback.tick(start + 499ms), "Advanced before the frame deadline");
     require(playback.tick(start + 500ms), "Missed the frame deadline");
     require(!playback.tick(start + 500ms), "Advanced twice at the same deadline");
+    playback.reset_timer(start + 1s);
+    require(!playback.tick(start + 1499ms) && playback.tick(start + 1500ms),
+            "Reset did not schedule a full frame");
     playback.pause();
     require(!playback.playing() && !playback.tick(start + 10s), "Pause did not stop time");
     playback.toggle(start + 10s);
@@ -31,6 +34,8 @@ void check_timing() {
             "A delayed frame caused a catch-up burst");
     playback.toggle(start + 20s);
     require(!playback.playing(), "Space-style toggle did not pause");
+    playback.reset_timer(start + 30s);
+    require(!playback.playing() && !playback.tick(start + 31s), "Reset resumed playback");
 }
 
 void check_speed() {
@@ -52,6 +57,9 @@ void check_speed() {
     life::Playback fastest(maximum, start);
     fastest.increase_speed(start);
     require(fastest.fps() == maximum, "Speed overflowed");
+    const auto next_tick = start + life::Playback::Clock::duration{1};
+    require(!fastest.tick(start) && fastest.tick(next_tick) && !fastest.tick(next_tick),
+            "A sub-clock frame period repeated a tick");
 }
 
 int main() {

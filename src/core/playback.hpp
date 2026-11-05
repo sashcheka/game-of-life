@@ -16,11 +16,10 @@ public:
     void toggle(Clock::time_point now = Clock::now());
     void increase_speed(Clock::time_point now = Clock::now());
     void decrease_speed(Clock::time_point now = Clock::now());
+    void reset_timer(Clock::time_point now = Clock::now());
     [[nodiscard]] bool tick(Clock::time_point now = Clock::now());
 
 private:
-    void schedule_next_frame(Clock::time_point now);
-
     std::size_t fps_;
     bool playing_ = true;
     Clock::time_point next_frame_;
