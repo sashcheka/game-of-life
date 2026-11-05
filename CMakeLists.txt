@@ -16,6 +16,7 @@ if(MSVC)
 endif()
 
 add_library(life_core
+    src/core/rules.cpp
     src/core/world.cpp
     src/core/simulation.cpp
     src/core/playback.cpp

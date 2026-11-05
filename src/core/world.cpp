@@ -70,13 +70,13 @@ std::size_t World::count_live_neighbors(std::size_t x, std::size_t y) const {
     return count;
 }
 
-World World::next_generation() const {
+World World::next_generation(const Rules& rules) const {
     World next = *this;
 
     for (std::size_t y = 0; y < height(); ++y) {
         for (std::size_t x = 0; x < width(); ++x) {
             const auto neighbors = count_live_neighbors(x, y);
-            next.cells_[y * width_ + x] = neighbors == 3 || (neighbors == 2 && is_alive(x, y));
+            next.cells_[y * width_ + x] = rules.next_state(is_alive(x, y), neighbors);
         }
     }
     return next;
