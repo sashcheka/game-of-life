@@ -56,7 +56,7 @@ int main() {
                             std::to_string(simulation.latest_generation())),
                 ftxui::text(std::string(playback.playing() ? "Playing" : "Paused") +
                             " | " + std::to_string(playback.fps()) + " fps"),
-                ftxui::text("Space: play/pause | Left/Right: step | +/-: speed | Q: save and exit"),
+                ftxui::text("Space: play/pause | Left/Right: step | Up/Down: speed | Q: save and exit"),
                 ftxui::separator(),
             };
             for (const auto& row : life::format_cells(simulation.current_world(),
@@ -73,11 +73,11 @@ int main() {
                 }
                 return true;
             }
-            if (event == ftxui::Event::Character('+')) {
+            if (event == ftxui::Event::ArrowUp) {
                 playback.increase_speed();
                 return true;
             }
-            if (event == ftxui::Event::Character('-')) {
+            if (event == ftxui::Event::ArrowDown) {
                 playback.decrease_speed();
                 return true;
             }
