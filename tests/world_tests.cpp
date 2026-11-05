@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -49,7 +50,64 @@ bool evolves_to(const char* name, std::vector<std::string> cells,
     return true;
 }
 
+bool checks_storage_boundaries() {
+    for (const std::size_t width : {31, 32, 33, 63, 64, 65, 127, 128, 129}) {
+        std::vector<std::string> cells(3, std::string(width, '.'));
+        for (std::size_t y = 0; y < cells.size(); ++y) {
+            for (std::size_t x = 0; x < width; ++x) {
+                if ((x + 3 * y) % 5 == 0) {
+                    cells[y][x] = '*';
+                }
+            }
+        }
+        cells.back().back() = '*';
+        const life::World world(cells);
+        for (std::size_t y = 0; y < cells.size(); ++y) {
+            for (std::size_t x = 0; x < width; ++x) {
+                if (world.is_alive(x, y) != (cells[y][x] == '*')) {
+                    std::cerr << "Cell storage changed a row or block boundary\n";
+                    return false;
+                }
+            }
+        }
+        for (const auto x : {width, std::numeric_limits<std::size_t>::max()}) {
+            try {
+                (void)world.is_alive(x, 1);
+                std::cerr << "An invalid column reached another row\n";
+                return false;
+            } catch (const std::out_of_range&) {
+            }
+        }
+        const life::World dead(std::vector<std::string>(3, std::string(width, '.')));
+        if (dead.has_living_cells() || dead.next_generation() != dead) {
+            std::cerr << "Unused storage created living cells\n";
+            return false;
+        }
+        if (life::World({std::string(width - 1, '.') + '*'}).next_generation().has_living_cells()) {
+            std::cerr << "The final living cell survived extinction\n";
+            return false;
+        }
+        std::vector<std::string> vertical(3, std::string(width, '.'));
+        for (auto& row : vertical) {
+            row[width - 2] = '*';
+        }
+        auto horizontal = std::vector<std::string>(3, std::string(width, '.'));
+        horizontal[1].replace(width - 3, 3, "***");
+        if (!evolves_to("Blinker across a storage boundary", vertical, horizontal)) {
+            return false;
+        }
+    }
+    if (life::World({"**", ".."}) == life::World({"**.."})) {
+        std::cerr << "World equality ignored the dimensions\n";
+        return false;
+    }
+    return true;
+}
+
 int main() {
+    if (!checks_storage_boundaries()) {
+        return 1;
+    }
     const life::World world({"*..", "..*"});
     if (world.width() != 3 || world.height() != 2 ||
         !world.is_alive(0, 0) || !world.is_alive(2, 1) || world.is_alive(1, 0)) {
