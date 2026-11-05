@@ -71,12 +71,17 @@ if(BUILD_TESTING)
     target_link_libraries(cell_formatter_tests PRIVATE life_terminal)
     add_test(NAME cell_formatter_tests COMMAND cell_formatter_tests)
 
+    add_executable(game_view_tests tests/game_view_tests.cpp)
+    target_link_libraries(game_view_tests PRIVATE life_terminal)
+    add_test(NAME game_view_tests COMMAND game_view_tests)
+
     list(APPEND life_targets
         world_tests
         simulation_tests
         playback_tests
         json_storage_tests
         cell_formatter_tests
+        game_view_tests
     )
 
     foreach(case IN ITEMS
