@@ -24,8 +24,6 @@ public:
     [[nodiscard]] CellStyle style() const noexcept;
     void start();
     void finish();
-    void draw(const World& world, std::size_t generation, std::size_t limit,
-              std::size_t fps) const;
 
 private:
     bool active_ = false;

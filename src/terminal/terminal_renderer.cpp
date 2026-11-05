@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -13,17 +12,11 @@
 #endif
 #include <windows.h>
 #else
-#include <sys/ioctl.h>
 #include <unistd.h>
 #endif
 
 namespace life {
 namespace {
-
-struct TerminalSize {
-    std::size_t columns = 80;
-    std::size_t rows = 24;
-};
 
 std::vector<std::string> draw_ascii(const World& world, std::size_t columns,
                                    std::size_t rows) {
@@ -60,22 +53,6 @@ std::vector<std::string> draw_half_blocks(const World& world, std::size_t column
         lines.push_back(line);
     }
     return lines;
-}
-
-TerminalSize terminal_size() {
-#ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO info{};
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info)) {
-        return {static_cast<std::size_t>(info.srWindow.Right - info.srWindow.Left + 1),
-                static_cast<std::size_t>(info.srWindow.Bottom - info.srWindow.Top + 1)};
-    }
-#else
-    winsize size{};
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0 && size.ws_col > 0 && size.ws_row > 0) {
-        return {size.ws_col, size.ws_row};
-    }
-#endif
-    return {};
 }
 
 } // namespace
@@ -152,43 +129,6 @@ void TerminalRenderer::finish() {
         std::cout << "\x1b[?25h\x1b[?1049l" << std::flush;
         screen_active_ = false;
     }
-}
-
-void TerminalRenderer::draw(const World& world, std::size_t generation,
-                            std::size_t limit, std::size_t fps) const {
-    if (!screen_active_) {
-        return;
-    }
-    const auto size = terminal_size();
-    const auto columns = size.columns - 1;
-    const auto rows = size.rows - 1;
-    const auto visible_columns = std::min(world.width(), columns);
-    const auto grid = format_cells(world, style_, columns, rows > 4 ? rows - 4 : 0);
-    const auto visible_rows = style_ == CellStyle::HalfBlocks
-        ? std::min(world.height(), grid.size() * 2) : grid.size();
-    std::ostringstream content;
-    content << "Game of Life | " << world.width() << " x " << world.height() << '\n'
-            << "Generation " << generation << " / " << limit << " | " << fps << " fps | "
-            << (style_ == CellStyle::HalfBlocks ? "half-blocks" : "ASCII") << '\n'
-            << "Ctrl+C to stop\n";
-    if (visible_columns < world.width() || visible_rows < world.height()) {
-        content << "Showing top-left " << visible_columns << " x " << visible_rows;
-    }
-    content << '\n';
-    std::istringstream lines(content.str());
-    std::ostringstream frame;
-    frame << "\x1b[H";
-    std::string line;
-    for (std::size_t y = 0; y < rows && std::getline(lines, line); ++y) {
-        frame << line.substr(0, columns) << "\x1b[K\n";
-    }
-    // Grid lines are clipped by cell count before UTF-8 encoding, not by bytes.
-    for (const auto& grid_line : grid) {
-        frame << grid_line << "\x1b[K\n";
-    }
-    // Erase any remainder from the previous frame, for example after resizing.
-    frame << "\x1b[J";
-    std::cout << frame.str() << std::flush;
 }
 
 } // namespace life
