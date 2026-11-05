@@ -122,6 +122,14 @@ if(BUILD_TESTING)
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/batch_case.cmake"
         )
     endforeach()
+
+    foreach(case IN ITEMS missing_birth missing_survive missing_input invalid_birth
+                          invalid_survive unknown_option missing_file)
+        add_test(NAME cli_${case} COMMAND ${CMAKE_COMMAND}
+            "-DPROGRAM=$<TARGET_FILE:game_of_life>" "-DCASE=${case}"
+            "-DTEST_DIR=${CMAKE_CURRENT_BINARY_DIR}/cli-tests/${case}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_errors.cmake")
+    endforeach()
 endif()
 
 foreach(target IN LISTS life_targets)
