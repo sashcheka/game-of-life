@@ -1,15 +1,17 @@
 #include "world.hpp"
 
+#include <algorithm>
 #include <stdexcept>
-#include <utility>
 
 namespace life {
 
-World::World(std::vector<std::string> cells) : cells_(std::move(cells)) {
-    if (cells_.empty() || cells_.front().empty()) {
+World::World(const std::vector<std::string>& cells) {
+    if (cells.empty() || cells.front().empty()) {
         throw std::invalid_argument("World dimensions must be positive");
     }
-    for (const auto& row : cells_) {
+    width_ = cells.front().size();
+    height_ = cells.size();
+    for (const auto& row : cells) {
         if (row.size() != width()) {
             throw std::invalid_argument("World rows must have equal lengths");
         }
@@ -17,27 +19,34 @@ World::World(std::vector<std::string> cells) : cells_(std::move(cells)) {
             throw std::invalid_argument("World cells must be '.' or '*'");
         }
     }
+    if (height_ > cells_.max_size() / width_) {
+        throw std::length_error("World dimensions exceed supported storage size");
+    }
+    cells_.resize(width_ * height_);
+    for (std::size_t y = 0; y < height_; ++y) {
+        for (std::size_t x = 0; x < width_; ++x) {
+            cells_[y * width_ + x] = cells[y][x] == '*';
+        }
+    }
 }
 
 std::size_t World::width() const noexcept {
-    return cells_.front().size();
+    return width_;
 }
 
 std::size_t World::height() const noexcept {
-    return cells_.size();
+    return height_;
 }
 
 bool World::is_alive(std::size_t x, std::size_t y) const {
-    return cells_.at(y).at(x) == '*';
+    if (x >= width_ || y >= height_) {
+        throw std::out_of_range("Cell coordinates are outside the world");
+    }
+    return cells_.at(y * width_ + x);
 }
 
 bool World::has_living_cells() const noexcept {
-    for (const auto& row : cells_) {
-        if (row.find('*') != std::string::npos) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(cells_.begin(), cells_.end(), true) != cells_.end();
 }
 
 std::size_t World::count_live_neighbors(std::size_t x, std::size_t y) const {
@@ -62,17 +71,15 @@ std::size_t World::count_live_neighbors(std::size_t x, std::size_t y) const {
 }
 
 World World::next_generation() const {
-    std::vector<std::string> next_cells(height(), std::string(width(), '.'));
+    World next = *this;
 
     for (std::size_t y = 0; y < height(); ++y) {
         for (std::size_t x = 0; x < width(); ++x) {
             const auto neighbors = count_live_neighbors(x, y);
-            if (neighbors == 3 || (neighbors == 2 && is_alive(x, y))) {
-                next_cells[y][x] = '*';
-            }
+            next.cells_[y * width_ + x] = neighbors == 3 || (neighbors == 2 && is_alive(x, y));
         }
     }
-    return World(std::move(next_cells));
+    return next;
 }
 
 } // namespace life

@@ -8,7 +8,7 @@ namespace life {
 
 class World {
 public:
-    explicit World(std::vector<std::string> cells);
+    explicit World(const std::vector<std::string>& cells);
 
     [[nodiscard]] std::size_t width() const noexcept;
     [[nodiscard]] std::size_t height() const noexcept;
@@ -20,7 +20,9 @@ public:
     [[nodiscard]] bool operator==(const World&) const = default;
 
 private:
-    std::vector<std::string> cells_;
+    std::size_t width_ = 0;
+    std::size_t height_ = 0;
+    std::vector<bool> cells_;
 };
 
 } // namespace life
