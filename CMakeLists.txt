@@ -28,9 +28,12 @@ target_include_directories(life_json PUBLIC src/storage)
 target_include_directories(life_json SYSTEM PRIVATE third_party)
 target_link_libraries(life_json PUBLIC life_core)
 
-add_library(life_terminal src/terminal/terminal_renderer.cpp)
+add_library(life_terminal
+    src/terminal/terminal_renderer.cpp
+    src/terminal/game_view.cpp
+)
 target_include_directories(life_terminal PUBLIC src/terminal)
-target_link_libraries(life_terminal PUBLIC life_core)
+target_link_libraries(life_terminal PUBLIC life_core ftxui)
 
 add_executable(game_of_life src/main.cpp src/app/application.cpp)
 target_include_directories(game_of_life PRIVATE src/app)

@@ -1,3 +1,4 @@
+#include "game_view.hpp"
 #include "json_storage.hpp"
 #include "playback.hpp"
 #include "simulation.hpp"
@@ -5,14 +6,10 @@
 
 #include <ftxui.hpp>
 
-#include <algorithm>
 #include <chrono>
-#include <cstddef>
 #include <exception>
 #include <iostream>
-#include <string>
 #include <thread>
-#include <utility>
 
 void run_playback(ftxui::App& app, const ftxui::Component& controls,
                   life::Simulation& simulation, life::Playback& playback) {
@@ -46,25 +43,8 @@ int main() {
         app.TrackMouse(false);
         app.ForceHandleCtrlC(false);
 
-        auto view = ftxui::Renderer([&] {
-            const auto size = ftxui::Terminal::Size();
-            const auto columns = static_cast<std::size_t>(std::max(0, size.dimx - 2));
-            const auto rows = static_cast<std::size_t>(std::max(0, size.dimy - 6));
-            ftxui::Elements content{
-                ftxui::text("Generation " + std::to_string(simulation.generation()) +
-                            " / " + std::to_string(config.cycles) + " | Computed: " +
-                            std::to_string(simulation.latest_generation())),
-                ftxui::text(std::string(playback.playing() ? "Playing" : "Paused") +
-                            " | " + std::to_string(playback.fps()) + " fps"),
-                ftxui::text("Space: play/pause | Left/Right: step | Up/Down: speed | Q: save and exit"),
-                ftxui::separator(),
-            };
-            for (const auto& row : life::format_cells(simulation.current_world(),
-                                                     life::CellStyle::HalfBlocks, columns, rows)) {
-                content.push_back(ftxui::text(row));
-            }
-            return ftxui::vbox(std::move(content)) | ftxui::border;
-        });
+        auto view = life::make_game_view(simulation, playback, config.cycles,
+                                         life::CellStyle::HalfBlocks);
 
         auto controls = ftxui::CatchEvent(view, [&](ftxui::Event event) {
             if (event == ftxui::Event::Character(' ')) {
