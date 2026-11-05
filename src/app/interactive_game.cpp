@@ -48,9 +48,6 @@ std::size_t run_interactive(World& world, std::size_t cycles, std::size_t fps,
     auto app = ftxui::App::Fullscreen();
     app.TrackMouse(false);
     app.ForceHandleCtrlC(false);
-    auto quirks = ftxui::Terminal::GetQuirks();
-    quirks.SetComponentAscii(style == CellStyle::Ascii);
-    ftxui::Terminal::SetQuirks(quirks);
     auto view = make_game_view(simulation, playback, cycles, style);
     auto controls = make_game_controls(app, view, simulation, playback);
     run_playback(app, controls, simulation, playback);

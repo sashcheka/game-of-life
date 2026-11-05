@@ -10,6 +10,7 @@ namespace life {
 ftxui::Component make_game_view(const Simulation& simulation, const Playback& playback,
                                 std::size_t cycles, CellStyle style) {
     return ftxui::Renderer([&simulation, &playback, cycles, style] {
+        const bool ascii = style == CellStyle::Ascii;
         const auto size = ftxui::Terminal::Size();
         const auto columns = static_cast<std::size_t>(std::max(0, size.dimx - 2));
         const auto rows = static_cast<std::size_t>(std::max(0, size.dimy - 6));
@@ -20,12 +21,13 @@ ftxui::Component make_game_view(const Simulation& simulation, const Playback& pl
             ftxui::text(std::string(playback.playing() ? "Playing" : "Paused") +
                         " | " + std::to_string(playback.fps()) + " fps"),
             ftxui::text("Space: play/pause | Left/Right: step | Up/Down: speed | Q: save and exit"),
-            ftxui::separator(),
+            ascii ? ftxui::separatorCharacter("-") : ftxui::separator(),
         };
         for (const auto& row : format_cells(simulation.current_world(), style, columns, rows)) {
             content.push_back(ftxui::text(row));
         }
-        return ftxui::vbox(std::move(content)) | ftxui::border;
+        auto panel = ftxui::vbox(std::move(content));
+        return ascii ? ftxui::borderEmpty(panel) : ftxui::border(panel);
     });
 }
 
