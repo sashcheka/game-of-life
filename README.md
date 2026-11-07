@@ -52,45 +52,21 @@ Field edges do not wrap. Reaching the cycle limit or extinction saves
 Quitting saves the currently selected generation. Ctrl+C also stops batch runs
 after the current generation. Resize the terminal to see more of a large field.
 
-## Try other rules
+## Options and examples
 
-Rules default to `--birth 3 --survive 23` (Conway). Each digit is an allowed neighbor
-count from 0 to 8: `36` means 3 or 6. Use `none` for an empty set.
-Rules stay fixed during a run, including rewind and replay.
-
-Run these commands from the repository root:
-
-| Example | Command (macOS / Linux) |
+| Option | Purpose |
 | --- | --- |
-| HighLife: a replicating seed | `./build/game_of_life --input examples/highlife.json --birth 36 --survive 23` |
-| Seeds: expanding patterns | `./build/game_of_life --input examples/seeds.json --birth 2 --survive none` |
-| Day & Night: changing dense regions | `./build/game_of_life --input examples/day-night.json --birth 3678 --survive 34678` |
-| Day & Night: a wave of period-16 oscillators | `./build/game_of_life --input examples/day-night-waves.json --birth 3678 --survive 34678` |
-| Kok's galaxy: eight rotating oscillators | `./build/game_of_life --input examples/galaxy-rotors.json` |
-| Serviettes: expanding Persian rugs | `./build/game_of_life --input examples/serviettes.json --birth 234 --survive none` |
+| `--batch` | Calculate without animation, delays, or history, then exit. Use for redirected output. |
+| `--ascii` | Use `*`/`.` instead of Unicode in interactive mode. |
+| `--input path` | Select another input JSON; output still goes to the working directory. |
+| `--birth 36 --survive 23` | Allowed neighbor counts: HighLife example; `none` means an empty set. |
+| `--wave` | Separate geometric animation of repeating rings; incompatible with `--birth` / `--survive`. |
 
+Example: `./build/game_of_life --input examples/day-night-waves.json --birth 3678 --survive 34678`.
+For rings: `./build/game_of_life --wave --input examples/wave.json`.
 On Windows, use `.\build\Debug\game_of_life.exe` with the same arguments.
-Examples use fields up to 78 x 33 and the original JSON schema.
-The wave uses R-pentomino oscillators with phase offsets; the galaxies repeat every
-8 generations. These two fields repeat without hitting the borders. Serviettes
-starts from a centered 2 x 2 block; its expanding pattern eventually meets the edges.
-HighLife seed: [LifeWiki replicator](https://conwaylife.com/wiki/OCA:HighLife/Replicator).
-Pattern references: [Day & Night](https://mail.conwaylife.com/wiki/OCA%3ADay_%26_Night),
-[Kok's galaxy](https://conwaylife.com/wiki/Kok%27s_galaxy),
-[Serviettes in Golly](https://golly.sourceforge.io/Help/Algorithms/QuickLife.html).
-
-## Repeating wave source
-
-```sh
-./build/game_of_life --wave --input examples/wave.json
-```
-
-This geometric animation emits a hollow ring from the center every 32 generations.
-Older rings keep expanding, with empty space between them. Each radius grows one
-cell every four generations; neighboring radii differ by 8 cells. The input supplies the
-field dimensions, FPS, and cycle limit. Playback continues through empty intervals
-until the cycle limit; the usual pause, speed, and history controls work.
-Birth and survival options belong to Life mode and cannot be combined with `--wave`.
+Small terminals clip the grid, and Unicode appearance depends on the font.
+See [the cover letter](COVER_LETTER.md) for architecture, limitations, and development tools.
 
 ## Tests
 
