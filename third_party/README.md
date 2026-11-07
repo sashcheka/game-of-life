@@ -10,5 +10,15 @@
 - Header SHA-256:
   `aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63`.
 
-The library is included in the source archive. No package installation or network
-download is needed during configuration, building, or running.
+## FTXUI
+
+- Version: 7.0.3.
+- Terminal rendering and keyboard input on Windows, macOS, and Linux.
+- Amalgamated sources: `ftxui/ftxui.hpp` and `ftxui/ftxui.cpp`.
+- License and release provenance: see [ftxui/README.md](ftxui/README.md).
+
+Both libraries are included as source in the submission. No package manager,
+network download, or separately installed library is needed to build or run.
+CMake's `Threads::Threads` uses the platform's threading support; it is not an
+additional third-party dependency. CMake, a C++20 compiler, and build tools are
+required development tools and are not bundled.
