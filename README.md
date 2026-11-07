@@ -71,59 +71,51 @@ ctest --test-dir build -C Release --output-on-failure
 
 ## English
 
-Game of Life with configurable rules and a wave animation mode in a C++20 terminal application
-for macOS, Linux, and Windows.
+A **C++20** terminal Game of Life for **Windows, macOS, and Linux**.
+Conway's rules are the default: birth with 3 neighbors, survival with 2 or 3.
+Generations update synchronously on a rectangular grid with fixed, non-wrapping edges.
 
-Requires **CMake 3.20+**, a **C++20 compiler**, and its build tools.
-`nlohmann/json`, FTXUI, and their licenses are included in `third_party/`;
-no dependency installation or network access is needed during the build.
+### Requirements and libraries
 
-## Build and run
+Requires **CMake 3.20+**, a C++20 compiler, and build tools
+(e.g. Visual Studio 2022 with C++ development components on Windows).
+CMake and the compiler are development tools and are not bundled.
+**nlohmann/json 3.12.0** (JSON) and **FTXUI 7.0.3** (terminal UI) are included as source
+in `third_party/`, with their licenses. No library installation or internet access is required.
+
+### Build and run
+
+Run all commands from the project root.
 
 macOS / Linux:
 
 ```sh
-cmake -S . -B build
-cmake --build build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
 ./build/game_of_life
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-Windows with Visual Studio (PowerShell):
+Windows, PowerShell with Visual Studio build tools available:
 
 ```powershell
 cmake -S . -B build
-cmake --build build --config Debug
-.\build\Debug\game_of_life.exe
+cmake --build build --config Release
+.\build\Release\game_of_life.exe
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-Run from the repository root. Generations update in place at the configured FPS.
-Live mode uses Unicode half-blocks: two cell rows per terminal line.
-The board border follows the world edges; smaller terminals clip the view.
-Add `--ascii` for the original `*`/`.` display, or `--batch` for a fast calculation
-without animation. Both flags can be combined. Use `--batch` for redirected output.
+### Input, output, and controls
 
-Playback starts at the configured FPS. **Space** toggles pause; **Up/Down** changes FPS
-by one (minimum 1). **Left/Right** pauses and steps through history; holding an arrow
-accelerates from 1 to 5 to 20 generations per repeat. A gap or another key resets it.
-The cycle limit or extinction pauses playback so you can rewind.
-**Q** or **Ctrl+C** saves the selected state and exits.
-The supplied inputs use 30 FPS and a limit of 6000 generations.
+Reads `game_of_life_input.json` from the working directory by default, using the JSON
+schema shown above. Grid dimensions must match the cell rows: `*` is alive, `.` is dead.
+Dimensions and FPS must be positive integers; `cycles` must be a nonnegative integer
+(0 preserves the initial grid).
+Writes `game_of_life_output.json` with a `result` object containing `width`, `height`, and `cells`.
 
-## Input and output
-
-Edit `game_of_life_input.json`, or select another file with `--input path`:
-
-- `world.width`, `world.height`: positive integers matching the grid dimensions.
-- `world.cells`: strings using `*` for living cells and `.` for dead cells.
-- `simulation.fps`: positive integer controlling live playback speed.
-- `simulation.cycles`: nonnegative integer limiting steps; `0` keeps the initial state.
-
-Field edges do not wrap. Reaching the cycle limit or extinction saves
-`game_of_life_output.json`: interactive mode pauses for rewinding; batch mode exits.
-Quitting saves the currently selected generation. Ctrl+C also stops batch runs
-after the current generation. Resize the terminal to see more of a large field.
-
-## Options and examples
+**Space** pauses; **Left/Right** steps through history (holding accelerates);
+**Up/Down** changes speed; **Q / Ctrl+C** saves the selected generation and exits.
+Extinction or the cycle limit saves the result and pauses the interface.
 
 | Option | Purpose |
 | --- | --- |
@@ -135,15 +127,6 @@ after the current generation. Resize the terminal to see more of a large field.
 
 Example: `./build/game_of_life --input examples/day-night-waves.json --birth 3678 --survive 34678`.
 For rings: `./build/game_of_life --wave --input examples/wave.json`.
-On Windows, use `.\build\Debug\game_of_life.exe` with the same arguments.
+On Windows, use `.\build\Release\game_of_life.exe` with the same arguments.
 Small terminals clip the grid, and Unicode appearance depends on the font.
 See [the cover letter](COVER_LETTER.md) for architecture, limitations, and development tools.
-
-## Tests
-
-```sh
-ctest --test-dir build --output-on-failure
-```
-
-For Visual Studio builds, add `-C Debug`.
-GitHub Actions builds and tests on macOS, Linux, and Windows on pushes and pull requests.
