@@ -21,6 +21,10 @@ std::size_t Playback::fps() const noexcept {
     return fps_;
 }
 
+Playback::Clock::time_point Playback::next_frame_time() const noexcept {
+    return next_frame_;
+}
+
 void Playback::pause() noexcept {
     playing_ = false;
 }
@@ -48,14 +52,22 @@ bool Playback::tick(Clock::time_point now) {
     if (!playing_ || now < next_frame_) {
         return false;
     }
-    reset_timer(now);
+    const auto period = frame_period();
+    next_frame_ += period;
+    if (next_frame_ <= now) {
+        next_frame_ = now + period;
+    }
     return true;
 }
 
 void Playback::reset_timer(Clock::time_point now) {
+    next_frame_ = now + frame_period();
+}
+
+Playback::Clock::duration Playback::frame_period() const {
     const auto period = std::chrono::duration<double>(1.0 / static_cast<double>(fps_));
     const auto delay = std::chrono::duration_cast<Clock::duration>(period);
-    next_frame_ = now + std::max(delay, Clock::duration{1});
+    return std::max(delay, Clock::duration{1});
 }
 
 } // namespace life

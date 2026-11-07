@@ -12,6 +12,7 @@ public:
     explicit Playback(std::size_t fps, Clock::time_point now = Clock::now());
     [[nodiscard]] bool playing() const noexcept;
     [[nodiscard]] std::size_t fps() const noexcept;
+    [[nodiscard]] Clock::time_point next_frame_time() const noexcept;
     void pause() noexcept;
     void toggle(Clock::time_point now = Clock::now());
     void increase_speed(Clock::time_point now = Clock::now());
@@ -20,6 +21,7 @@ public:
     [[nodiscard]] bool tick(Clock::time_point now = Clock::now());
 
 private:
+    [[nodiscard]] Clock::duration frame_period() const;
     std::size_t fps_;
     bool playing_ = true;
     Clock::time_point next_frame_;

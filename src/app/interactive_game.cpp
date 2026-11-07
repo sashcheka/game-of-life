@@ -5,6 +5,7 @@
 #include "json_storage.hpp"
 #include "stop_signal.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <thread>
 
@@ -32,7 +33,11 @@ void run_playback(ftxui::App& app, const ftxui::Component& controls,
             save_result("game_of_life_output.json", simulation.current_world());
             saved_end = true;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        auto wake_up = Playback::Clock::now() + std::chrono::milliseconds(10);
+        if (playback.playing()) {
+            wake_up = std::min(wake_up, playback.next_frame_time());
+        }
+        std::this_thread::sleep_until(wake_up);
     }
 }
 

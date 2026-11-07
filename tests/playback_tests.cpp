@@ -62,10 +62,36 @@ void check_speed() {
             "A sub-clock frame period repeated a tick");
 }
 
+void check_deadline_drift() {
+    const life::Playback::Clock::time_point start{};
+    life::Playback playback(10, start);
+    require(playback.next_frame_time() == start + 100ms, "Incorrect first deadline");
+    require(playback.tick(start + 105ms) &&
+            playback.next_frame_time() == start + 200ms,
+            "A small delay shifted the next deadline");
+    require(!playback.tick(start + 199ms) && playback.tick(start + 200ms),
+            "Playback did not keep its original schedule");
+    require(playback.tick(start + 2s) && !playback.tick(start + 2s) &&
+            playback.next_frame_time() == start + 2100ms,
+            "A long delay caused a catch-up burst");
+
+    life::Playback thirty_fps(30, start);
+    std::size_t frames = 0;
+    for (int milliseconds = 0; milliseconds <= 10000; milliseconds += 10) {
+        frames += thirty_fps.tick(start + std::chrono::milliseconds(milliseconds));
+    }
+    require(frames == 300, "Polling delays accumulated and reduced FPS");
+    life::Playback fast(200, start);
+    require(fast.next_frame_time() == start + 5ms && fast.tick(start + 5ms) &&
+            fast.next_frame_time() == start + 10ms,
+            "Fast playback did not expose sub-10ms deadlines");
+}
+
 int main() {
     try {
         check_timing();
         check_speed();
+        check_deadline_drift();
         try {
             const life::Playback invalid(0);
             throw std::runtime_error("Zero FPS was accepted");
